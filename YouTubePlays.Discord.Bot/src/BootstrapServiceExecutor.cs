@@ -53,7 +53,6 @@ namespace YouTubePlays.Discord.Bot
                 System.Console.ReadLine();
                 _cancellationTokenSource.Cancel();
             }
-            
         }
     }
 }

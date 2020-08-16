@@ -10,7 +10,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 
         public override KeyboardOptions KeyboardOptions { get; } = new KeyboardOptions
         {
-            KeyMapSizes = new []{ (8, 3), (8, 3), (6, 3)},
+            KeyMapSizes = new[] { (8, 3), (8, 3), (6, 3) },
             PreExecuteCommand = "st,rt",
             StartingPosition = (0, 3),
             ModeSwitchDelay = 4

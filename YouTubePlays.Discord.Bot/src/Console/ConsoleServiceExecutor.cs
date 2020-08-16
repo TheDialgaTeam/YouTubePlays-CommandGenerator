@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Reflection;
-using System.Runtime.Versioning;
 using System.Threading;
 using Serilog;
 using TheDialgaTeam.Core.DependencyInjection;

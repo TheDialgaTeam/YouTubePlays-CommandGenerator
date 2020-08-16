@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace YouTubePlays.Discord.Bot.Discord.Command
+﻿namespace YouTubePlays.Discord.Bot.Discord.Command
 {
     public enum RequiredPermission
     {

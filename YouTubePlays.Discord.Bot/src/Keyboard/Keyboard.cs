@@ -75,7 +75,8 @@ namespace YouTubePlays.Discord.Bot.Keyboard
                 currentNameLength++;
             }
 
-            keyboardCommand.Append(",st,a");
+            keyboardCommand.Append(",");
+            keyboardCommand.AppendLine(KeyboardOptions.PostExecuteCommand);
 
             return keyboardCommand.ToString();
         }
@@ -91,7 +92,14 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 
                 if (mode != keyMapping.Mode)
                 {
-                    totalDistance = Math.Abs(keyMapping.Mode - mode);
+                    if (keyMapping.Mode > mode)
+                    {
+                        totalDistance = keyMapping.Mode - mode;
+                    }
+                    else
+                    {
+                        totalDistance = keyboardOptions.KeyMapSizes.Length - mode + keyMapping.Mode;
+                    }
 
                     var modeSwitchDelay = keyboardOptions.ModeSwitchDelay;
 
@@ -110,6 +118,17 @@ namespace YouTubePlays.Discord.Bot.Keyboard
                             command.Append(",p");
                             command.Append(modeSwitchDelay);
                         }
+                    }
+
+                    command.Append(",");
+                    command.Append(keyboardOptions.PostModeSwitchCommand);
+
+                    var (postModeSwitchPositionX, postModeSwitchPositionY) = keyboardOptions.PostModeSwitchPosition[keyMapping.Mode];
+
+                    if (postModeSwitchPositionX != -1 && postModeSwitchPositionY != -1)
+                    {
+                        x = postModeSwitchPositionX;
+                        y = postModeSwitchPositionY;
                     }
 
                     // Location adjustment because the keymap size is different.

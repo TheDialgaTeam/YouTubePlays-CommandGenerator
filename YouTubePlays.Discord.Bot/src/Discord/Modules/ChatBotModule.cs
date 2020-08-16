@@ -34,7 +34,8 @@ Touch Y Offset: {_chatBot.TouchYOffset}")
         [Command("SetChatBotInputLimit")]
         [Summary("Set chat bot input limit.")]
         [RequirePermission(RequiredPermission.GuildAdministrator)]
-        public async Task SetChatBotInputLimitAsync([Summary("Input limit to conform to.")] int inputLimit)
+        public async Task SetChatBotInputLimitAsync([Summary("Input limit to conform to.")]
+            int inputLimit)
         {
             if (inputLimit < 1)
             {

@@ -46,7 +46,8 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
         [Command("SetCurrentKeyboard")]
         [Alias("SetKeyboard")]
         [Summary("Set the current keyboard.")]
-        public async Task SetCurrentKeyboardAsync([Summary("Keyboard to set.")] [Remainder] string keyboardCode)
+        public async Task SetCurrentKeyboardAsync([Summary("Keyboard to set.")] [Remainder]
+            string keyboardCode)
         {
             var isAvailable = false;
 
@@ -72,10 +73,11 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
         [Command("GetKeyboardCommand")]
         [Alias("Name", "Command")]
         [Summary("Get keyboard command.")]
-        public async Task GetKeyboardCommandAsync([Summary("Keys on the keyboard.")] [Remainder] string keys)
+        public async Task GetKeyboardCommandAsync([Summary("Keys on the keyboard.")] [Remainder]
+            string keys)
         {
             var result = _keyboardCollection.GetCommands(keys, _chatBot);
-            
+
             await ReplyAsync("Here is the command to enter this name in ytp:").ConfigureAwait(false);
 
             foreach (var command in result)
