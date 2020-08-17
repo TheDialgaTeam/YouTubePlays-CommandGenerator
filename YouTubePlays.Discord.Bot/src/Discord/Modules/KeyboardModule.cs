@@ -32,6 +32,9 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
                 keyboardHelp.AppendLine($"{keyboard.ShortKey}: {keyboard.Name}");
             }
 
+            keyboardHelp.AppendLine();
+            keyboardHelp.AppendLine("More Keyboards coming soon!");
+
             await ReplyAsync(keyboardHelp.ToString()).ConfigureAwait(false);
         }
 
@@ -46,6 +49,7 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
         [Command("SetCurrentKeyboard")]
         [Alias("SetKeyboard")]
         [Summary("Set the current keyboard.")]
+        [Example("SetCurrentKeyboard 5")]
         public async Task SetCurrentKeyboardAsync([Summary("Keyboard to set.")] [Remainder]
             string keyboardCode)
         {
@@ -73,16 +77,24 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
         [Command("GetKeyboardCommand")]
         [Alias("Name", "Command")]
         [Summary("Get keyboard command.")]
+        [Example("GetKeyboardCommand test")]
         public async Task GetKeyboardCommandAsync([Summary("Keys on the keyboard.")] [Remainder]
             string keys)
         {
-            var result = _keyboardCollection.GetCommands(keys, _chatBot);
-
-            await ReplyAsync("Here is the command to enter this name in ytp:").ConfigureAwait(false);
-
-            foreach (var command in result)
+            try
             {
-                await ReplyAsync(command).ConfigureAwait(false);
+                var result = _keyboardCollection.GetCommands(keys, _chatBot);
+
+                await ReplyAsync("Here is the command to enter this name in ytp:").ConfigureAwait(false);
+
+                foreach (var command in result)
+                {
+                    await ReplyAsync(command).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                await ReplyAsync(CommandExecuteResult.FromError(ex.Message).BuildDiscordTextResponse()).ConfigureAwait(false);
             }
         }
     }

@@ -33,7 +33,7 @@ namespace YouTubePlays.Discord.Bot
                 serviceCollection.AddSingleton<LoggingLevelSwitch>();
                 serviceCollection.AddSingleton<ILogger>(factory =>
                 {
-                    const string outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss}] [{Level}] {Message}{NewLine}{Exception}";
+                    const string outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss}] {Message}{NewLine}{Exception}";
 
                     var logsDirectory = Path.Combine(Environment.CurrentDirectory, "Logs");
 

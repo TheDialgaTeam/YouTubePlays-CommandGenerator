@@ -49,7 +49,7 @@ namespace YouTubePlays.Discord.Bot
                 _config.SaveConfig();
                 _logger.Information($"Config saved at: {_config.ConfigFilePath}");
                 _logger.Information("Please configure the bot before relaunch :)");
-                _logger.Information("Press any key to exit.");
+                _logger.Information("Press enter key to exit.");
                 System.Console.ReadLine();
                 _cancellationTokenSource.Cancel();
             }

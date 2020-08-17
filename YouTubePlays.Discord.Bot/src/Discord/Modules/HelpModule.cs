@@ -22,17 +22,11 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
 
         private static bool CheckCommandEquals(CommandInfo command, string commandName)
         {
-            if (command.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
+            if (command.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase)) return true;
 
             foreach (var commandAlias in command.Aliases)
             {
-                if (commandAlias.Equals(commandName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
+                if (commandAlias.Equals(commandName, StringComparison.OrdinalIgnoreCase)) return true;
             }
 
             return false;
@@ -125,7 +119,7 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
 d: Days, ranging from 0 to 10675199.
 h: Hours, ranging from 0 to 23.
 m: Minutes, ranging from 0 to 59.
-s: Optional seconds, ranging from 0 to 59.");
+s: Optional seconds, ranging from 0 to 59.\n");
                         ignoredTypes.Add(typeof(TimeSpan));
                         break;
 
@@ -165,9 +159,7 @@ s: Optional seconds, ranging from 0 to 59.");
 
             foreach (var module in _commandService.Modules)
             {
-                var moduleName = $"{module.Name} Module";
-
-                if (moduleName == "Help Module") continue;
+                if (module.Name.Equals("Help", StringComparison.OrdinalIgnoreCase)) continue;
 
                 var commandInfo = new StringBuilder();
 
@@ -185,7 +177,7 @@ s: Optional seconds, ranging from 0 to 59.");
                         {
                             if (!commandAlias.Equals(command.Name, StringComparison.OrdinalIgnoreCase))
                             {
-                                commandInfo.Append($" `{commandAlias}`");
+                                commandInfo.Append($", `{commandAlias}`");
                             }
                         }
                     }
@@ -195,7 +187,7 @@ s: Optional seconds, ranging from 0 to 59.");
 
                 if (commandInfo.Length > 0)
                 {
-                    helpMessage = helpMessage.AddField(moduleName, commandInfo.ToString());
+                    helpMessage = helpMessage.AddField($"{module.Name} Module", commandInfo.ToString());
                 }
             }
 
@@ -263,15 +255,15 @@ s: Optional seconds, ranging from 0 to 59.");
                     {
                         if (commandParameter.IsMultiple)
                         {
-                            commandInfo.Append($" `params {commandParameter.Type.Name}[] {commandParameter.Name}`");
+                            commandInfo.Append($" `<params {commandParameter.Type.Name}[] {commandParameter.Name}>`");
                         }
                         else if (commandParameter.IsOptional)
                         {
-                            commandInfo.Append($" `{(commandParameter.IsRemainder ? "Remainder " : "")}{commandParameter.Type.Name} {commandParameter.Name} = {commandParameter.DefaultValue ?? "null"}`");
+                            commandInfo.Append($" `[{(commandParameter.IsRemainder ? "Remainder " : "")}{commandParameter.Type.Name} {commandParameter.Name} = {commandParameter.DefaultValue ?? "null"}]`");
                         }
                         else
                         {
-                            commandInfo.Append($" `{(commandParameter.IsRemainder ? "Remainder " : "")}{commandParameter.Type.Name} {commandParameter.Name}`");
+                            commandInfo.Append($" `<{(commandParameter.IsRemainder ? "Remainder " : "")}{commandParameter.Type.Name} {commandParameter.Name}>`");
                         }
 
                         argsInfo.AppendLine($"{commandParameter.Type.Name} {commandParameter.Name}: {commandParameter.Summary}");
@@ -285,6 +277,14 @@ s: Optional seconds, ranging from 0 to 59.");
                     {
                         commandInfo.AppendLine("\nArguments Info:");
                         commandInfo.Append(argsInfo);
+                    }
+
+                    foreach (var commandAttribute in command.Attributes)
+                    {
+                        if (!(commandAttribute is ExampleAttribute exampleAttribute)) continue;
+
+                        commandInfo.AppendLine("\nExample:");
+                        commandInfo.AppendLine(exampleAttribute.Message);
                     }
 
                     if (!string.IsNullOrEmpty(AppendNotes(command)))

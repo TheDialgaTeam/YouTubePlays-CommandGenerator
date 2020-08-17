@@ -56,7 +56,7 @@ namespace YouTubePlays.Discord.Bot.Discord
                     }
                     catch (Exception ex)
                     {
-                        logger.Error(ex, "\u001b[31;1m Unable to authenticate into discord server. \u001b[0m");
+                        logger.Error(ex, "\u001b[31;1mUnable to authenticate into discord server.\u001b[0m");
                     }
 
                     foreach (var discordSocketClient in discordClient.Shards)
@@ -70,7 +70,7 @@ namespace YouTubePlays.Discord.Bot.Discord
                         }
                         catch (Exception ex)
                         {
-                            logger.Error(ex, "\u001b[31;1m Unable to connect into discord server. \u001b[0m");
+                            logger.Error(ex, "\u001b[31;1mUnable to connect into discord server.\u001b[0m");
                         }
                     }
                 }
@@ -129,7 +129,7 @@ namespace YouTubePlays.Discord.Bot.Discord
                 if (state is (ILogger logger, DiscordShardedClient discordShardedClient, DiscordSocketClient currentDiscordSocketClient))
                 {
                     await currentDiscordSocketClient.SetGameAsync($"{currentDiscordSocketClient.CurrentUser?.Username} help").ConfigureAwait(false);
-                    logger.Information($"\u001b[32;1m {currentDiscordSocketClient.CurrentUser}: Shard {currentDiscordSocketClient.ShardId + 1}/{discordShardedClient.Shards.Count} is ready! \u001b[0m");
+                    logger.Information($"\u001b[32;1m{currentDiscordSocketClient.CurrentUser}: Shard {currentDiscordSocketClient.ShardId + 1}/{discordShardedClient.Shards.Count} is ready!\u001b[0m");
                 }
             }, (_logger, _discordClient, discordSocketClient), _cancellationTokenSource.Token).Unwrap();
         }

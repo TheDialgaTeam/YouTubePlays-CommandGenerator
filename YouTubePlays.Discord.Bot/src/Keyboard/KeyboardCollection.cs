@@ -11,6 +11,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
         {
             new Generation2Keyboard(),
             new Generation3Keyboard(),
+            new Generation5Keyboard(),
             new Generation7Keyboard()
         };
 

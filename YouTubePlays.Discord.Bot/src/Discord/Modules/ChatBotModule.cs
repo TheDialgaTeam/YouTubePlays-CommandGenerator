@@ -34,6 +34,7 @@ Touch Y Offset: {_chatBot.TouchYOffset}")
         [Command("SetChatBotInputLimit")]
         [Summary("Set chat bot input limit.")]
         [RequirePermission(RequiredPermission.GuildAdministrator)]
+        [Example("SetChatBotInputLimit 5")]
         public async Task SetChatBotInputLimitAsync([Summary("Input limit to conform to.")]
             int inputLimit)
         {
@@ -68,6 +69,7 @@ Touch Y Offset: {_chatBot.TouchYOffset}")
         [Command("SetChatBotTouchXOffset")]
         [Summary("Set chat bot touch x coordinate offset.")]
         [RequirePermission(RequiredPermission.GuildAdministrator)]
+        [Example("SetChatBotTouchXOffset 0")]
         public async Task SetChatBotTouchXOffset([Summary("X coordinate offset.")] int offset)
         {
             if (offset < -100 || offset > 100)
@@ -83,6 +85,7 @@ Touch Y Offset: {_chatBot.TouchYOffset}")
         [Command("SetChatBotTouchYOffset")]
         [Summary("Set chat bot touch y coordinate offset.")]
         [RequirePermission(RequiredPermission.GuildAdministrator)]
+        [Example("SetChatBotTouchYOffset 0")]
         public async Task SetChatBotTouchYOffset([Summary("Y coordinate offset.")] int offset)
         {
             if (offset < -100 || offset > 100)
