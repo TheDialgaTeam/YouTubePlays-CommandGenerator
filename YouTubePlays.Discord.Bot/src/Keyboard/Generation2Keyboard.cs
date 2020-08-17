@@ -12,7 +12,8 @@ namespace YouTubePlays.Discord.Bot.Keyboard
         {
             KeyMapSizes = new[] { (8, 4), (8, 4) },
             PreExecuteCommand = "st,d",
-            StartingPosition = (8, 0)
+            StartingPosition = (8, 0),
+            PostModeSwitchPosition = new[] { (-1, -1), (-1, -1) }
         };
 
         public override TouchOptions TouchOptions { get; } = new TouchOptions

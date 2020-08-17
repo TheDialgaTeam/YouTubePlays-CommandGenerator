@@ -120,8 +120,11 @@ namespace YouTubePlays.Discord.Bot.Keyboard
                         }
                     }
 
-                    command.Append(",");
-                    command.Append(keyboardOptions.PostModeSwitchCommand);
+                    if (!string.IsNullOrWhiteSpace(keyboardOptions.PostModeSwitchCommand))
+                    {
+                        command.Append(",");
+                        command.Append(keyboardOptions.PostModeSwitchCommand);
+                    }
 
                     var (postModeSwitchPositionX, postModeSwitchPositionY) = keyboardOptions.PostModeSwitchPosition[keyMapping.Mode];
 
