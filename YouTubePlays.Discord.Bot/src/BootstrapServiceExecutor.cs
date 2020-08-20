@@ -30,7 +30,7 @@ namespace YouTubePlays.Discord.Bot
             System.Console.CancelKeyPress += (sender, args) => { args.Cancel = true; };
 
             _logger.Information("==================================================");
-            _logger.Information($"YouTubePlays Command Generator Bot v{version} {frameworkVersion}");
+            _logger.Information("YouTubePlays Command Generator Bot v{version:l} {frameworkVersion:l}", version, frameworkVersion);
             _logger.Information("==================================================");
 
             if (File.Exists(_config.ConfigFilePath))
@@ -41,7 +41,7 @@ namespace YouTubePlays.Discord.Bot
             else
             {
                 _config.SaveConfig();
-                _logger.Information($"Config saved at: {_config.ConfigFilePath}");
+                _logger.Information("Config saved at: {ConfigFilePath}", _config.ConfigFilePath);
                 _logger.Information("Please configure the bot before relaunch :)");
                 _logger.Information("Press enter key to exit.");
                 System.Console.ReadLine();

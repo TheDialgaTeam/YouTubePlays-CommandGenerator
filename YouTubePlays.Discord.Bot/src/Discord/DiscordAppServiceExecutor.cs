@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -15,7 +14,7 @@ namespace YouTubePlays.Discord.Bot.Discord
     {
         private readonly ILogger _logger;
         private readonly IConfig _config;
-        private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly CancellationToken _cancellationToken;
         private readonly CommandService _commandService;
         private readonly IServiceProvider _serviceProvider;
 
@@ -25,7 +24,7 @@ namespace YouTubePlays.Discord.Bot.Discord
         {
             _logger = logger;
             _config = config;
-            _cancellationTokenSource = cancellationTokenSource;
+            _cancellationToken = cancellationTokenSource.Token;
             _commandService = commandService;
             _serviceProvider = serviceProvider;
 
@@ -88,38 +87,79 @@ namespace YouTubePlays.Discord.Bot.Discord
                 if (!(state is (ILogger logger, DiscordShardedClient discordShardedClient, LogMessage logMessageState))) return;
 
                 var currentUser = discordShardedClient.CurrentUser;
-                var message = currentUser == null ? $"[Bot] {logMessageState.ToString()}" : $"[Bot {currentUser.Id}] {currentUser.Username}: {logMessageState.ToString()}";
 
                 switch (logMessageState.Severity)
                 {
                     case LogSeverity.Critical:
-                        logger.Fatal(message);
+                        if (currentUser == null)
+                        {
+                            logger.Fatal("[Bot] \u001b[31;1m{logMessageState:l}\u001b[0m", logMessageState);
+                        }
+                        else
+                        {
+                            logger.Fatal("[Bot {id}] {Username:l}: \u001b[31;1m{logMessageState:l}\u001b[0m", currentUser.Id, currentUser.Username, logMessageState);
+                        }
                         break;
 
                     case LogSeverity.Error:
-                        logger.Error(message);
+                        if (currentUser == null)
+                        {
+                            logger.Error("[Bot] \u001b[31;1m{logMessageState:l}\u001b[0m", logMessageState);
+                        }
+                        else
+                        {
+                            logger.Error("[Bot {id}] {Username:l}: \u001b[31;1m{logMessageState:l}\u001b[0m", currentUser.Id, currentUser.Username, logMessageState);
+                        }
                         break;
 
                     case LogSeverity.Warning:
-                        logger.Warning(message);
+                        if (currentUser == null)
+                        {
+                            logger.Warning("[Bot] \u001b[43;1m{logMessageState:l}\u001b[0m", logMessageState);
+                        }
+                        else
+                        {
+                            logger.Warning("[Bot {id}] {Username:l}: \u001b[43;1m{logMessageState:l}\u001b[0m", currentUser.Id, currentUser.Username, logMessageState);
+                        }
                         break;
 
                     case LogSeverity.Info:
-                        logger.Information(message);
+                        if (currentUser == null)
+                        {
+                            logger.Information("[Bot] {logMessageState:l}", logMessageState);
+                        }
+                        else
+                        {
+                            logger.Information("[Bot {id}] {Username:l}: {logMessageState:l}", currentUser.Id, currentUser.Username, logMessageState);
+                        }
                         break;
 
                     case LogSeverity.Verbose:
-                        logger.Verbose(message);
+                        if (currentUser == null)
+                        {
+                            logger.Verbose("[Bot] {logMessageState:l}", logMessageState);
+                        }
+                        else
+                        {
+                            logger.Verbose("[Bot {id}] {Username:l}: {logMessageState:l}", currentUser.Id, currentUser.Username, logMessageState);
+                        }
                         break;
 
                     case LogSeverity.Debug:
-                        logger.Debug(message);
+                        if (currentUser == null)
+                        {
+                            logger.Debug("[Bot] {logMessageState:l}", logMessageState);
+                        }
+                        else
+                        {
+                            logger.Debug("[Bot {id}] {Username:l}: {logMessageState:l}", currentUser.Id, currentUser.Username, logMessageState);
+                        }
                         break;
 
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-            }, (_logger, _discordClient, logMessage), _cancellationTokenSource.Token, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+            }, (_logger, _discordClient, logMessage), _cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
 
         private Task DiscordClientOnShardReady(DiscordSocketClient discordSocketClient)
@@ -130,9 +170,10 @@ namespace YouTubePlays.Discord.Bot.Discord
                 {
                     var currentUser = discordSocketClientState.CurrentUser;
                     await discordSocketClientState.SetGameAsync($"{currentUser.Username} help").ConfigureAwait(false);
-                    logger.Information($"[Bot {currentUser.Id}] {currentUser.Username}: \u001b[32;1mShard {discordSocketClientState.ShardId + 1}/{discordShardedClient.Shards.Count} is ready!\u001b[0m");
+
+                    logger.Information("[Bot {Id}] {Username:l}: \u001b[32;1mShard {CurrentShard}/{TotalShard} is ready!\u001b[0m", currentUser.Id, currentUser.Username, discordSocketClientState.ShardId + 1, discordShardedClient.Shards.Count);
                 }
-            }, (_logger, _discordClient, discordSocketClient), _cancellationTokenSource.Token, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default).Unwrap();
+            }, (_logger, _discordClient, discordSocketClient), _cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default).Unwrap();
         }
 
         private Task DiscordClientOnMessageReceived(SocketMessage socketMessage)
@@ -162,7 +203,7 @@ namespace YouTubePlays.Discord.Bot.Discord
                         await commandService.ExecuteAsync(context, argPos, serviceProvider).ConfigureAwait(false);
                     }
                 }
-            }, (_config, _discordClient, _commandService, _serviceProvider, socketMessage), _cancellationTokenSource.Token, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default).Unwrap();
+            }, (_config, _discordClient, _commandService, _serviceProvider, socketMessage), _cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default).Unwrap();
         }
 
         public void Dispose()
