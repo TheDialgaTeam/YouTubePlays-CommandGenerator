@@ -8,6 +8,7 @@ using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Core;
+using Serilog.Events;
 using TheDialgaTeam.Core.DependencyInjection;
 using TheDialgaTeam.Core.Logger;
 using TheDialgaTeam.Core.Logger.Formatter;
@@ -26,11 +27,11 @@ namespace YouTubePlays.Discord.Bot
 
         private static void Main()
         {
-            DependencyManager.InstallService(serviceCollection =>
+            DependencyManager.InstallServices(serviceCollection =>
             {
-                serviceCollection.AddSingleton(factory => factory);
                 serviceCollection.AddSingleton<IConfig, JsonConfig>(factory => new JsonConfig(Path.Combine(Environment.CurrentDirectory, "config.json")));
-                serviceCollection.AddSingleton<LoggingLevelSwitch>();
+
+                serviceCollection.AddSingleton(factory => new LoggingLevelSwitch(LogEventLevel.Verbose));
                 serviceCollection.AddSingleton<ILogger>(factory =>
                 {
                     const string outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss}] {Message}{NewLine}{Exception}";
@@ -44,10 +45,11 @@ namespace YouTubePlays.Discord.Bot
 
                     return new LoggerConfiguration()
                         .MinimumLevel.ControlledBy(factory.GetRequiredService<LoggingLevelSwitch>())
-                        .WriteTo.CustomConsole(new OutputTemplateTextFormatter(outputTemplate))
+                        .WriteTo.AnsiConsole(new OutputTemplateTextFormatter(outputTemplate))
                         .WriteTo.Async(configuration => configuration.File(Path.Combine(logsDirectory, "log.log"), outputTemplate: outputTemplate, rollingInterval: RollingInterval.Day, fileSizeLimitBytes: null, retainedFileCountLimit: null), blockWhenFull: true)
                         .CreateLogger();
                 });
+
                 serviceCollection.AddSingleton(factory =>
                 {
                     var commandService = new CommandService(new CommandServiceConfig { CaseSensitiveCommands = false });
@@ -56,8 +58,10 @@ namespace YouTubePlays.Discord.Bot
 
                     return commandService;
                 });
+
                 serviceCollection.AddSingleton<ChatBot>();
                 serviceCollection.AddSingleton<KeyboardCollection>();
+
                 serviceCollection.AddSingleton<IServiceExecutor, BootstrapServiceExecutor>();
                 serviceCollection.AddSingleton<IServiceExecutor, ConsoleServiceExecutor>();
                 serviceCollection.AddSingleton<IServiceExecutor, DiscordAppServiceExecutor>();
@@ -65,30 +69,36 @@ namespace YouTubePlays.Discord.Bot
 
             DependencyManager.BuildAndExecute((serviceProvider, ex) =>
             {
-                var cancellationTokenSource = serviceProvider.GetService<CancellationTokenSource>();
-                var logger = serviceProvider.GetService<ILogger>();
-
-                if (logger != null)
+                if (serviceProvider != null)
                 {
-                    if (ex is AggregateException aggregateException)
-                    {
-                        foreach (var exception in aggregateException.InnerExceptions)
-                        {
-                            if (exception is TaskCanceledException)
-                            {
-                                continue;
-                            }
+                    var cancellationTokenSource = serviceProvider.GetService<CancellationTokenSource>();
+                    var logger = serviceProvider.GetService<ILogger>();
 
-                            logger.Fatal(exception, "");
+                    if (logger != null)
+                    {
+                        if (ex is AggregateException aggregateException)
+                        {
+                            var innerExceptions = aggregateException.InnerExceptions;
+
+                            foreach (var exception in innerExceptions)
+                            {
+                                if (exception is TaskCanceledException) continue;
+                                logger.Fatal(exception, "\u001b[31;1mProgram crashed!\u001b[0m");
+                            }
+                        }
+                        else
+                        {
+                            logger.Fatal(ex, "\u001b[31;1mProgram crashed!\u001b[0m");
                         }
                     }
-                    else
-                    {
-                        logger.Fatal(ex, "");
-                    }
+
+                    cancellationTokenSource?.Cancel();
+                }
+                else
+                {
+                    System.Console.Error.WriteLine(ex.ToString());
                 }
 
-                cancellationTokenSource?.Cancel();
                 Environment.Exit(1);
             });
         }

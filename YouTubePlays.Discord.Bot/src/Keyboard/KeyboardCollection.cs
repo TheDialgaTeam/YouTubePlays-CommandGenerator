@@ -7,8 +7,8 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 {
     public class KeyboardCollection
     {
-        public List<IKeyboard> Keyboards { get; } = new List<IKeyboard>
-        {
+        public IKeyboard[] Keyboards { get; } = {
+            new Generation1Keyboard(),
             new Generation2Keyboard(),
             new Generation3Keyboard(),
             new Generation5Keyboard(),
@@ -24,13 +24,16 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 
         public string[] GetCommands(string name, ChatBot chatBot)
         {
-            var fullCommand = CurrentKeyboard.GetChatCommand(name, chatBot).Split(',');
             var result = new List<string>();
             var commandBuilder = new StringBuilder();
             var currentIndex = 0;
 
+            var fullCommand = CurrentKeyboard.GetChatCommand(name, chatBot).Split(',');
+
             foreach (var command in fullCommand)
             {
+                if (string.IsNullOrWhiteSpace(command)) continue;
+
                 var match = Regex.Match(command, "([a-z]+)(\\d+)");
 
                 if (match.Success)

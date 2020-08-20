@@ -6,50 +6,41 @@ namespace TheDialgaTeam.Core.DependencyInjection
 {
     public class DependencyManager : IDisposable
     {
-        private readonly IServiceCollection _serviceCollection;
+        private readonly IServiceCollection _serviceCollection = new ServiceCollection();
 
-        private ServiceProvider _serviceProvider;
-
-        private bool _isExecuted;
-
-        private bool _isDisposed;
+        private ServiceProvider? _serviceProvider;
 
         public DependencyManager()
         {
-            _serviceCollection = new ServiceCollection();
+            _serviceCollection.AddSingleton(factory => factory);
             _serviceCollection.AddSingleton<CancellationTokenSource>();
             _serviceCollection.AddSingleton<ITaskCreator, TaskCollection>();
         }
 
-        public void InstallService(IServiceInstaller serviceInstaller)
-        {
-            serviceInstaller.InstallService(_serviceCollection);
-        }
-
-        public void InstallService(Action<IServiceCollection> installServiceAction)
+        public void InstallServices(Action<IServiceCollection> installServiceAction)
         {
             installServiceAction(_serviceCollection);
         }
 
-        public void BuildAndExecute(Action<IServiceProvider, Exception> executeFailedAction)
+        public void BuildAndExecute(Action<IServiceProvider?, Exception> executeFailedAction)
         {
             try
             {
-                if (_isExecuted) return;
-
-                _isExecuted = true;
-
                 _serviceProvider = _serviceCollection.BuildServiceProvider();
 
                 var serviceExecutors = _serviceProvider.GetServices<IServiceExecutor>();
-                var taskAwaiter = _serviceProvider.GetRequiredService<ITaskCreator>();
 
-                foreach (var serviceExecutor in serviceExecutors)
+                if (serviceExecutors != null)
                 {
-                    serviceExecutor.ExecuteService(taskAwaiter);
+                    var taskCreator = _serviceProvider.GetRequiredService<ITaskCreator>();
+
+                    foreach (var serviceExecutor in serviceExecutors)
+                    {
+                        serviceExecutor.ExecuteService(taskCreator);
+                    }
                 }
 
-                (taskAwaiter as TaskCollection)?.WaitAll();
+                (_serviceProvider.GetRequiredService<ITaskCreator>() as TaskCollection)?.WaitAll();
             }
             catch (Exception ex)
             {
@@ -63,9 +54,6 @@ namespace TheDialgaTeam.Core.DependencyInjection
 
         public void Dispose()
         {
-            if (_isDisposed) return;
-            _isDisposed = true;
-
             _serviceProvider?.Dispose();
         }
     }

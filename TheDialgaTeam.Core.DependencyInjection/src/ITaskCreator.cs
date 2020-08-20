@@ -6,12 +6,12 @@ namespace TheDialgaTeam.Core.DependencyInjection
 {
     public interface ITaskCreator
     {
-        Task CreateAndEnqueueTask(Action<CancellationToken> taskToAwait);
+        void CreateAndEnqueueTask(Action<CancellationToken> taskToAwait);
 
-        Task CreateAndEnqueueTask(Func<CancellationToken, Task> taskToAwait);
+        void CreateAndEnqueueTask(Func<CancellationToken, Task> taskToAwait);
 
-        Task CreateAndEnqueueTask<T>(T state, Action<T, CancellationToken> action);
+        void CreateAndEnqueueTask<T>(T state, Action<T, CancellationToken> action);
 
-        Task CreateAndEnqueueTask<T>(T state, Func<T, CancellationToken, Task> function);
+        void CreateAndEnqueueTask<T>(T state, Func<T, CancellationToken, Task> function);
     }
 }

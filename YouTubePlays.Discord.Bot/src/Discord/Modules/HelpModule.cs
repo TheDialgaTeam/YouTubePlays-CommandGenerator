@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -14,7 +15,7 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
         private readonly CommandService _commandService;
         private readonly IServiceProvider _serviceProvider;
 
-        public HelpModule(CommandService commandService, IServiceProvider serviceProvider)
+        public HelpModule(CommandService commandService, IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource) : base(cancellationTokenSource)
         {
             _commandService = commandService;
             _serviceProvider = serviceProvider;
@@ -119,7 +120,8 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
 d: Days, ranging from 0 to 10675199.
 h: Hours, ranging from 0 to 23.
 m: Minutes, ranging from 0 to 59.
-s: Optional seconds, ranging from 0 to 59.\n");
+s: Optional seconds, ranging from 0 to 59.
+");
                         ignoredTypes.Add(typeof(TimeSpan));
                         break;
 
@@ -151,11 +153,13 @@ s: Optional seconds, ranging from 0 to 59.\n");
         [Command("Help")]
         public async Task HelpAsync()
         {
+            var currentUser = Context.Client.CurrentUser;
+
             var helpMessage = new EmbedBuilder()
                 .WithTitle("Available Command:")
                 .WithColor(Color.Orange)
-                .WithDescription($"To find out more about each command, use `@{Context.Client.CurrentUser} help <CommandName>`\nIn DM, you can use `help <CommandName>`")
-                .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl());
+                .WithDescription($"To find out more about each command, use `@{currentUser} help <CommandName>`\nIn DM, you can use `help <CommandName>`")
+                .WithThumbnailUrl(currentUser.GetAvatarUrl());
 
             foreach (var module in _commandService.Modules)
             {
@@ -165,7 +169,7 @@ s: Optional seconds, ranging from 0 to 59.\n");
 
                 foreach (var command in module.Commands)
                 {
-                    var preconditionResult = await command.CheckPreconditionsAsync(Context, _serviceProvider);
+                    var preconditionResult = await command.CheckPreconditionsAsync(Context, _serviceProvider).ConfigureAwait(false);
 
                     if (!preconditionResult.IsSuccess) continue;
 
@@ -187,11 +191,11 @@ s: Optional seconds, ranging from 0 to 59.\n");
 
                 if (commandInfo.Length > 0)
                 {
-                    helpMessage = helpMessage.AddField($"{module.Name} Module", commandInfo.ToString());
+                    helpMessage.AddField($"{module.Name} Module", commandInfo.ToString());
                 }
             }
 
-            await ReplyAsync("", false, helpMessage.Build()).ConfigureAwait(false);
+            await ReplyAsync(helpMessage.Build()).ConfigureAwait(false);
         }
 
         [Command("Help")]
@@ -199,18 +203,18 @@ s: Optional seconds, ranging from 0 to 59.\n");
         {
             foreach (var commandServiceModule in _commandService.Modules)
             {
-                var moduleName = $"{commandServiceModule.Name} Module";
-
-                if (moduleName == "Help Module") continue;
+                if (commandServiceModule.Name.Equals("Help", StringComparison.OrdinalIgnoreCase)) continue;
 
                 foreach (var command in commandServiceModule.Commands)
                 {
                     if (!CheckCommandEquals(command, commandName)) continue;
 
+                    var clientContext = Context.Client;
+
                     var helpMessage = new EmbedBuilder()
                         .WithTitle("Command Info:")
                         .WithColor(Color.Orange)
-                        .WithDescription($"To find out more about each command, use `@{Context.Client.CurrentUser} help <CommandName>`\nIn DM, you can use `help <CommandName>`");
+                        .WithDescription($"To find out more about each command, use `@{clientContext.CurrentUser} help <CommandName>`\nIn DM, you can use `help <CommandName>`");
 
                     var requiredPermission = RequiredPermission.GuildMember;
                     var requiredContext = ContextType.Guild | ContextType.DM | ContextType.Group;
@@ -241,14 +245,9 @@ s: Optional seconds, ranging from 0 to 59.\n");
                         requiredContexts.Add(ContextType.DM.ToString());
                     }
 
-                    if ((requiredContext & ContextType.Group) == ContextType.Group)
-                    {
-                        requiredContexts.Add(ContextType.Group.ToString());
-                    }
-
                     var requiredContextString = string.Join(", ", requiredContexts);
 
-                    var commandInfo = new StringBuilder($"Usage: {Context.Client.CurrentUser.Mention} {command.Name}");
+                    var commandInfo = new StringBuilder($"Usage: {clientContext.CurrentUser.Mention} {command.Name}");
                     var argsInfo = new StringBuilder();
 
                     foreach (var commandParameter in command.Parameters)
@@ -293,9 +292,9 @@ s: Optional seconds, ranging from 0 to 59.\n");
                         commandInfo.Append(AppendNotes(command));
                     }
 
-                    helpMessage = helpMessage.AddField($"{command.Name} command:", commandInfo.ToString());
+                    helpMessage.AddField($"{command.Name} command:", commandInfo.ToString());
 
-                    await ReplyAsync("", false, helpMessage.Build()).ConfigureAwait(false);
+                    await ReplyAsync(helpMessage.Build()).ConfigureAwait(false);
                     return;
                 }
             }

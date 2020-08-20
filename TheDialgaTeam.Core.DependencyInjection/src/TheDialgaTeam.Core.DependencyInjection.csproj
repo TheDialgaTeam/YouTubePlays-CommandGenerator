@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>TheDialgaTeam.Core.DependencyInjection</AssemblyName>
     <RootNamespace>TheDialgaTeam.Core.DependencyInjection</RootNamespace>
-    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <OutputType>Library</OutputType>
     <PackageId>TheDialgaTeam.Core.DependencyInjection</PackageId>
     <Version>0.0.1.0</Version>
@@ -14,6 +14,7 @@
     <PackageProjectUrl>https://github.com/TheDialgaTeam/TheDialgaTeam.Core.DependencyInjection</PackageProjectUrl>
     <RepositoryUrl>https://github.com/TheDialgaTeam/TheDialgaTeam.Core.DependencyInjection</RepositoryUrl>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">

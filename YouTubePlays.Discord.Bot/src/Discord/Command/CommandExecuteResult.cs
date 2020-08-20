@@ -1,54 +1,29 @@
-﻿using Discord;
-
-namespace YouTubePlays.Discord.Bot.Discord.Command
+﻿namespace YouTubePlays.Discord.Bot.Discord.Command
 {
-    public sealed class CommandExecuteResult
+    public class CommandExecuteResult
     {
-        public string? Message { get; }
+        private readonly string _message;
+        private readonly bool _isSuccess;
 
-        public EmbedBuilder? EmbedBuilder { get; }
-
-        public bool IsSuccess { get; }
-
-        private CommandExecuteResult(string? message, EmbedBuilder? embedBuilder, bool isSuccess)
+        private CommandExecuteResult(string message, bool isSuccess)
         {
-            Message = message;
-            EmbedBuilder = embedBuilder;
-            IsSuccess = isSuccess;
+            _message = message;
+            _isSuccess = isSuccess;
         }
 
         public static CommandExecuteResult FromSuccess(string message)
         {
-            return new CommandExecuteResult(message, null, true);
-        }
-
-        public static CommandExecuteResult FromSuccess(EmbedBuilder embedBuilder)
-        {
-            return new CommandExecuteResult(null, embedBuilder, true);
+            return new CommandExecuteResult(message, true);
         }
 
         public static CommandExecuteResult FromError(string message)
         {
-            return new CommandExecuteResult(message, null, false);
-        }
-
-        public static CommandExecuteResult FromError(EmbedBuilder embedBuilder)
-        {
-            return new CommandExecuteResult(null, embedBuilder, false);
+            return new CommandExecuteResult(message, false);
         }
 
         public string BuildDiscordTextResponse()
         {
-            if (Message == null) return null;
-
-            return IsSuccess ? $":white_check_mark: {Message}" : $":x: {Message}";
-        }
-
-        public Embed? BuildDiscordEmbedResponse()
-        {
-            if (EmbedBuilder == null) return null;
-
-            return IsSuccess ? EmbedBuilder.WithColor(Color.Green).Build() : EmbedBuilder.WithColor(Color.Red).Build();
+            return _isSuccess ? $":white_check_mark: {_message}" : $":x: {_message}";
         }
     }
 }

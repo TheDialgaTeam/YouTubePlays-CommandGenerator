@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -86,9 +87,8 @@ namespace YouTubePlays.Discord.Bot.Discord
             {
                 if (!(state is (ILogger logger, DiscordShardedClient discordShardedClient, LogMessage logMessageState))) return;
 
-                var botId = discordShardedClient.CurrentUser?.Id;
-                var botName = discordShardedClient.CurrentUser?.Username;
-                var message = discordShardedClient.CurrentUser == null ? $"[Bot] {logMessageState.ToString()}" : $"[Bot {botId}] {botName}: {logMessageState.ToString()}";
+                var currentUser = discordShardedClient.CurrentUser;
+                var message = currentUser == null ? $"[Bot] {logMessageState.ToString()}" : $"[Bot {currentUser.Id}] {currentUser.Username}: {logMessageState.ToString()}";
 
                 switch (logMessageState.Severity)
                 {
@@ -119,19 +119,20 @@ namespace YouTubePlays.Discord.Bot.Discord
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-            }, (_logger, _discordClient, logMessage), _cancellationTokenSource.Token);
+            }, (_logger, _discordClient, logMessage), _cancellationTokenSource.Token, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
 
         private Task DiscordClientOnShardReady(DiscordSocketClient discordSocketClient)
         {
             return Task.Factory.StartNew(async state =>
             {
-                if (state is (ILogger logger, DiscordShardedClient discordShardedClient, DiscordSocketClient currentDiscordSocketClient))
+                if (state is (ILogger logger, DiscordShardedClient discordShardedClient, DiscordSocketClient discordSocketClientState))
                 {
-                    await currentDiscordSocketClient.SetGameAsync($"{currentDiscordSocketClient.CurrentUser?.Username} help").ConfigureAwait(false);
-                    logger.Information($"\u001b[32;1m{currentDiscordSocketClient.CurrentUser}: Shard {currentDiscordSocketClient.ShardId + 1}/{discordShardedClient.Shards.Count} is ready!\u001b[0m");
+                    var currentUser = discordSocketClientState.CurrentUser;
+                    await discordSocketClientState.SetGameAsync($"{currentUser.Username} help").ConfigureAwait(false);
+                    logger.Information($"[Bot {currentUser.Id}] {currentUser.Username}: \u001b[32;1mShard {discordSocketClientState.ShardId + 1}/{discordShardedClient.Shards.Count} is ready!\u001b[0m");
                 }
-            }, (_logger, _discordClient, discordSocketClient), _cancellationTokenSource.Token).Unwrap();
+            }, (_logger, _discordClient, discordSocketClient), _cancellationTokenSource.Token, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default).Unwrap();
         }
 
         private Task DiscordClientOnMessageReceived(SocketMessage socketMessage)
@@ -161,7 +162,7 @@ namespace YouTubePlays.Discord.Bot.Discord
                         await commandService.ExecuteAsync(context, argPos, serviceProvider).ConfigureAwait(false);
                     }
                 }
-            }, (_config, _discordClient, _commandService, _serviceProvider, socketMessage), _cancellationTokenSource.Token).Unwrap();
+            }, (_config, _discordClient, _commandService, _serviceProvider, socketMessage), _cancellationTokenSource.Token, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default).Unwrap();
         }
 
         public void Dispose()

@@ -3,17 +3,18 @@ using YouTubePlays.Discord.Bot.Keyboard.Options;
 
 namespace YouTubePlays.Discord.Bot.Keyboard
 {
-    public class Generation2Keyboard : Keyboard
+    public class Generation1Keyboard : Keyboard
     {
-        public override string Name { get; } = "Generation 2 (Gold, Silver and Crystal)";
+        public override string Name { get; } = "Generation 1 (Red, Blue and Yellow)";
 
-        public override string ShortKey { get; } = "2";
+        public override string ShortKey { get; } = "1";
 
         protected override KeyboardOptions KeyboardOptions { get; } = new KeyboardOptions
         {
-            KeyMapSizes = new[] { (8, 4), (8, 4) },
-            PreExecuteCommand = "st,d",
-            StartingPosition = (8, 0)
+            KeyMapSizes = new[] { (8, 5), (8, 5) },
+            PostExecuteCommand = "st",
+            StartingPosition = (0, 0),
+            WarpYPosition = false
         };
 
         protected override TouchOptions TouchOptions { get; } = new TouchOptions
@@ -79,25 +80,27 @@ namespace YouTubePlays.Discord.Bot.Keyboard
             { "y", new[] { new KeyMapping(1, 6, 2) } },
             { "z", new[] { new KeyMapping(1, 7, 2) } },
 
-            { "-", new[] { new KeyMapping(0, 0, 3) } },
-            { "?", new[] { new KeyMapping(0, 1, 3) } },
-            { "!", new[] { new KeyMapping(0, 2, 3) } },
-            { "/", new[] { new KeyMapping(0, 3, 3) } },
-            { ".", new[] { new KeyMapping(0, 4, 3) } },
-            { ",", new[] { new KeyMapping(0, 5, 3) } },
+            { "×", new[] { new KeyMapping(0, 0, 3), new KeyMapping(1, 0, 3) } },
+            { "<X>", new[] { new KeyMapping(0, 0, 3), new KeyMapping(1, 0, 3) } },
+            { "(", new[] { new KeyMapping(0, 1, 3), new KeyMapping(1, 1, 3) } },
+            { ")", new[] { new KeyMapping(0, 2, 3), new KeyMapping(1, 2, 3) } },
+            { ":", new[] { new KeyMapping(0, 3, 3), new KeyMapping(1, 3, 3) } },
+            { ";", new[] { new KeyMapping(0, 4, 3), new KeyMapping(1, 4, 3) } },
+            { "[", new[] { new KeyMapping(0, 5, 3), new KeyMapping(1, 5, 3) } },
+            { "]", new[] { new KeyMapping(0, 6, 3), new KeyMapping(1, 6, 3) } },
+            { "<PK>", new[] { new KeyMapping(0, 7, 3), new KeyMapping(1, 7, 3) } },
+            { "<MN>", new[] { new KeyMapping(0, 8, 3), new KeyMapping(1, 8, 3) } },
 
-            { "×", new[] { new KeyMapping(1, 0, 3) } },
-            { "<X>", new[] { new KeyMapping(1, 0, 3) } },
-            { "(", new[] { new KeyMapping(1, 1, 3) } },
-            { ")", new[] { new KeyMapping(1, 2, 3) } },
-            { ":", new[] { new KeyMapping(1, 3, 3) } },
-            { ";", new[] { new KeyMapping(1, 4, 3) } },
-            { "[", new[] { new KeyMapping(1, 5, 3) } },
-            { "]", new[] { new KeyMapping(1, 6, 3) } },
-            { "<PK>", new[] { new KeyMapping(1, 7, 3) } },
-            { "<MN>", new[] { new KeyMapping(1, 8, 3) } },
-
-            { " ", new[] { new KeyMapping(0, 8, 2), new KeyMapping(0, 6, 3), new KeyMapping(0, 7, 3), new KeyMapping(0, 8, 3), new KeyMapping(1, 8, 2) } }
+            { "-", new[] { new KeyMapping(0, 0, 4), new KeyMapping(1, 0, 4) } },
+            { "?", new[] { new KeyMapping(0, 1, 4), new KeyMapping(1, 1, 4) } },
+            { "!", new[] { new KeyMapping(0, 2, 4), new KeyMapping(1, 2, 4) } },
+            { "♂", new[] { new KeyMapping(0, 3, 4), new KeyMapping(1, 3, 4) } },
+            { "<MALE>", new[] { new KeyMapping(0, 3, 4), new KeyMapping(1, 3, 4) } },
+            { "♀", new[] { new KeyMapping(0, 4, 4), new KeyMapping(1, 4, 4) } },
+            { "<FEMALE>", new[] { new KeyMapping(0, 4, 4), new KeyMapping(1, 4, 4) } },
+            { "/", new[] { new KeyMapping(0, 5, 4), new KeyMapping(1, 5, 4) } },
+            { ".", new[] { new KeyMapping(0, 6, 4), new KeyMapping(1, 6, 4) } },
+            { ",", new[] { new KeyMapping(0, 7, 4), new KeyMapping(1, 7, 4) } },
         };
     }
 }

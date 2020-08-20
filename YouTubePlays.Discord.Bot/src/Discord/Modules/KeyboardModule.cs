@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord.Commands;
 using YouTubePlays.Discord.Bot.Discord.Command;
@@ -13,7 +14,7 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
         private readonly KeyboardCollection _keyboardCollection;
         private readonly ChatBot _chatBot;
 
-        public KeyboardModule(KeyboardCollection keyboardCollection, ChatBot chatBot)
+        public KeyboardModule(KeyboardCollection keyboardCollection, ChatBot chatBot, CancellationTokenSource cancellationTokenSource) : base(cancellationTokenSource)
         {
             _keyboardCollection = keyboardCollection;
             _chatBot = chatBot;
@@ -31,9 +32,6 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
             {
                 keyboardHelp.AppendLine($"{keyboard.ShortKey}: {keyboard.Name}");
             }
-
-            keyboardHelp.AppendLine();
-            keyboardHelp.AppendLine("More Keyboards coming soon!");
 
             await ReplyAsync(keyboardHelp.ToString()).ConfigureAwait(false);
         }

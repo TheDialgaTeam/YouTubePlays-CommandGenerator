@@ -6,8 +6,8 @@
 
         public bool TouchAvailable { get; set; } = true;
 
-        public int TouchXOffset { get; set; } = 0;
+        public int TouchXOffset { get; set; }
 
-        public int TouchYOffset { get; set; } = 0;
+        public int TouchYOffset { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Serilog.Events;
 using Serilog.Formatting;
@@ -13,10 +12,8 @@ namespace TheDialgaTeam.Core.Logger.Formatter
     {
         private readonly ITokenFormatter[] _tokenFormatters;
 
-        public OutputTemplateTextFormatter(string outputTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+        public OutputTemplateTextFormatter(string outputTemplate = "[{Timestamp:HH:mm:ss} {Level}] {Message}{NewLine}{Exception}")
         {
-            outputTemplate = outputTemplate ?? throw new ArgumentNullException(nameof(outputTemplate));
-
             var messageTemplate = new MessageTemplateParser().Parse(outputTemplate);
             var messageTemplateTokens = messageTemplate.Tokens;
             var tokenFormatters = new List<ITokenFormatter>();

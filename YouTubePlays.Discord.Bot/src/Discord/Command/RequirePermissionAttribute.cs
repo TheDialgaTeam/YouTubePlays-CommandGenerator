@@ -17,10 +17,11 @@ namespace YouTubePlays.Discord.Bot.Discord.Command
         public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var currentUserPermission = RequiredPermission.GuildMember;
+            var contextUser = context.User;
 
             if (context.Message.Channel is SocketGuildChannel)
             {
-                var guildUser = await context.Guild.GetUserAsync(context.Message.Author.Id).ConfigureAwait(false);
+                var guildUser = await context.Guild.GetUserAsync(contextUser.Id).ConfigureAwait(false);
 
                 // Guild Administrator
                 if (guildUser.GuildPermissions.Administrator)
@@ -30,9 +31,9 @@ namespace YouTubePlays.Discord.Bot.Discord.Command
             }
 
             // Discord App Owner
-            var botOwner = (await context.Client.GetApplicationInfoAsync()).Owner;
+            var botOwner = (await context.Client.GetApplicationInfoAsync().ConfigureAwait(false)).Owner;
 
-            if (context.Message.Author.Id == botOwner.Id)
+            if (contextUser.Id == botOwner.Id)
             {
                 currentUserPermission = RequiredPermission.DiscordAppOwner;
             }

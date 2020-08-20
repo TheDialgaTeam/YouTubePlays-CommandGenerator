@@ -1,4 +1,4 @@
-﻿namespace YouTubePlays.Discord.Bot.Keyboard
+﻿namespace YouTubePlays.Discord.Bot.Keyboard.Options
 {
     public class KeyboardOptions
     {
@@ -17,5 +17,9 @@
         public string PostModeSwitchCommand { get; set; } = "";
 
         public (int x, int y)[] PostModeSwitchPosition { get; set; } = { (-1, -1) };
+
+        public bool WarpXPosition { get; set; } = true;
+
+        public bool WarpYPosition { get; set; } = true;
     }
 }

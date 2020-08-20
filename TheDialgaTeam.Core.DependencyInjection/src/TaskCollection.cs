@@ -11,71 +11,41 @@ namespace TheDialgaTeam.Core.DependencyInjection
 
         private readonly List<Task> _taskToAwait = new List<Task>();
 
-        private bool _isDisposed;
-
         public TaskCollection(CancellationTokenSource cancellationTokenSource)
         {
             _cancellationToken = cancellationTokenSource.Token;
         }
 
-        public Task CreateAndEnqueueTask(Action<CancellationToken> action)
+        public void CreateAndEnqueueTask(Action<CancellationToken> action)
         {
-            var task = Task.Factory.StartNew(state =>
+            _taskToAwait.Add(Task.Factory.StartNew(state =>
             {
-                if (state is ValueTuple<Action<CancellationToken>, CancellationToken> innerState)
+                if (state is (Action<CancellationToken> stateAction, CancellationToken stateCancellationToken))
                 {
-                    innerState.Item1(innerState.Item2);
+                    stateAction(stateCancellationToken);
                 }
-            }, (action, _cancellationToken), _cancellationToken);
-
-            _taskToAwait.Add(task);
-
-            return task;
+            }, (action, _cancellationToken), _cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default));
         }
 
-        public Task CreateAndEnqueueTask(Func<CancellationToken, Task> function)
+        public void CreateAndEnqueueTask(Func<CancellationToken, Task> function)
         {
-            var task = Task.Factory.StartNew(async state =>
-            {
-                if (state is ValueTuple<Func<CancellationToken, Task>, CancellationToken> innerState)
-                {
-                    await innerState.Item1(innerState.Item2).ConfigureAwait(false);
-                }
-            }, (function, _cancellationToken), _cancellationToken).Unwrap();
-
-            _taskToAwait.Add(task);
-
-            return task;
+            _taskToAwait.Add(Task.Factory.StartNew( state => state is (Func<CancellationToken, Task> stateFunction, CancellationToken stateCancellationToken) ? stateFunction(stateCancellationToken) : Task.CompletedTask, (function, _cancellationToken), _cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default).Unwrap());
         }
 
-        public Task CreateAndEnqueueTask<T>(T state, Action<T, CancellationToken> action)
+        public void CreateAndEnqueueTask<T>(T state, Action<T, CancellationToken> action)
         {
-            var task = Task.Factory.StartNew(state2 =>
+            _taskToAwait.Add(Task.Factory.StartNew(innerState =>
             {
-                if (state2 is ValueTuple<T, Action<T, CancellationToken>, CancellationToken> innerState)
+                if (innerState is (T stateObject, Action<T, CancellationToken> stateAction, CancellationToken stateCancellationToken))
                 {
-                    innerState.Item2(innerState.Item1, innerState.Item3);
+                    stateAction(stateObject, stateCancellationToken);
                 }
-            }, (state, action, _cancellationToken), _cancellationToken);
-
-            _taskToAwait.Add(task);
-
-            return task;
+            }, (state, action, _cancellationToken), _cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default));
         }
 
-        public Task CreateAndEnqueueTask<T>(T state, Func<T, CancellationToken, Task> function)
+        public void CreateAndEnqueueTask<T>(T state, Func<T, CancellationToken, Task> function)
         {
-            var task = Task.Factory.StartNew(async state2 =>
-            {
-                if (state2 is ValueTuple<T, Func<T, CancellationToken, Task>, CancellationToken> innerState)
-                {
-                    await innerState.Item2(innerState.Item1, innerState.Item3).ConfigureAwait(false);
-                }
-            }, (state, function, _cancellationToken), _cancellationToken).Unwrap();
-
-            _taskToAwait.Add(task);
-
-            return task;
+            _taskToAwait.Add(Task.Factory.StartNew(innerState => innerState is (T stateObject, Func<T, CancellationToken, Task> stateFunction, CancellationToken stateCancellationToken) ? stateFunction(stateObject, stateCancellationToken) : Task.CompletedTask, (state, function, _cancellationToken), _cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default).Unwrap());
         }
 
         public void WaitAll()
@@ -85,9 +55,6 @@ namespace TheDialgaTeam.Core.DependencyInjection
 
         public void Dispose()
         {
-            if (_isDisposed) return;
-            _isDisposed = true;
-
             var taskToAwait = _taskToAwait;
 
             foreach (var task in taskToAwait)

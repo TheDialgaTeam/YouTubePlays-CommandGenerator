@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using YouTubePlays.Discord.Bot.Keyboard.Options;
 
 namespace YouTubePlays.Discord.Bot.Keyboard
 {
@@ -8,25 +9,24 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 
         public override string ShortKey { get; } = "7";
 
-        public override KeyboardOptions KeyboardOptions { get; } = new KeyboardOptions
+        protected override KeyboardOptions KeyboardOptions { get; } = new KeyboardOptions
         {
             KeyMapSizes = new[] { (12, 5), (12, 5), (12, 5) },
             PreExecuteCommand = "l",
             StartingPosition = (0, 0),
-            ModeSwitchCommand = "y",
-            PostModeSwitchPosition = new[] { (-1, -1), (-1, -1), (-1, -1) }
+            ModeSwitchCommand = "y"
         };
 
-        public override TouchOptions TouchOptions { get; } = new TouchOptions
+        protected override TouchOptions TouchOptions { get; } = new TouchOptions
         {
             TouchAvailable = true,
             PreExecuteCommand = "l,t:15:89",
             ModeSwitchButton = new[] { (15, 89), (28, 89), (40, 89) }
         };
 
-        public override int NameLength { get; } = 12;
+        protected override int NameLength { get; } = 12;
 
-        public override Dictionary<string, KeyMapping[]> CharMappings { get; } = new Dictionary<string, KeyMapping[]>
+        protected override Dictionary<string, KeyMapping[]> CharMappings { get; } = new Dictionary<string, KeyMapping[]>
         {
             { "A", new[] { new KeyMapping(0, 0, 0, 12, 27) } },
             { "B", new[] { new KeyMapping(0, 1, 0, 19, 27) } },

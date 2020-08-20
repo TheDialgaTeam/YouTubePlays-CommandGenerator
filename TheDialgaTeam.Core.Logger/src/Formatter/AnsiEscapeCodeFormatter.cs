@@ -15,7 +15,7 @@ namespace TheDialgaTeam.Core.Logger.Formatter
         private const string AnsiEscapeRegex = "((?:\\u001b\\[[0-9:;<=>?]*[\\s!\"#$%&'()*+,\\-./]*[@A-Z[\\]^_`a-z{|}~])|(?:\\u001b[@A-Z\\[\\]^_]))";
         private static readonly bool IsAnsiEscapeCodeSupported;
 
-        private static readonly char[] PadChars = new string(' ', 1024).ToCharArray();
+        private static readonly char[] PadChars;
 
         private static readonly ConsoleColor DefaultForegroundColor = Console.ForegroundColor;
         private static readonly ConsoleColor DefaultBackgroundColor = Console.BackgroundColor;
@@ -39,9 +39,18 @@ namespace TheDialgaTeam.Core.Logger.Formatter
                     IsAnsiEscapeCodeSupported = false;
                 }
             }
+
+            var padChars = new char[1024];
+
+            for (var i = 0; i < padChars.Length; i++)
+            {
+                padChars[i] = ' ';
+            }
+
+            PadChars = padChars;
         }
 
-        public static void Format(TextWriter textWriter, string text, PropertyToken propertyToken = null)
+        public static void Format(TextWriter textWriter, string text, PropertyToken? propertyToken = null)
         {
             var isCompatibleAnsiOutput = textWriter == Console.Out || textWriter == Console.Error;
 
@@ -61,8 +70,8 @@ namespace TheDialgaTeam.Core.Logger.Formatter
                         return;
                     }
 
-                    var textChars = text.ToCharArray();
-                    var textCharsLength = textChars.Length;
+                    var textSpan = text.AsSpan();
+                    var textSpanLength = textSpan.Length;
                     var currentIndex = 0;
 
                     foreach (Match ansiToken in ansiTokens)
@@ -77,7 +86,7 @@ namespace TheDialgaTeam.Core.Logger.Formatter
                         }
                         else if (currentIndex < ansiTokenIndex)
                         {
-                            textWriter.Write(textChars, currentIndex, ansiTokenIndexOffset);
+                            textWriter.Write(textSpan.Slice(currentIndex, ansiTokenIndexOffset));
                             currentIndex += ansiTokenIndexOffset + ansiTokenLength;
                         }
 
@@ -218,9 +227,9 @@ namespace TheDialgaTeam.Core.Logger.Formatter
                         }
                     }
 
-                    if (currentIndex < textCharsLength)
+                    if (currentIndex < textSpanLength)
                     {
-                        textWriter.Write(textChars, currentIndex, textCharsLength - currentIndex);
+                        textWriter.Write(textSpan.Slice(currentIndex, textSpanLength - currentIndex));
                     }
                 }
             }
@@ -230,7 +239,7 @@ namespace TheDialgaTeam.Core.Logger.Formatter
             }
         }
 
-        private static void ApplyPadding(TextWriter textWriter, string text, PropertyToken propertyToken)
+        private static void ApplyPadding(TextWriter textWriter, string text, PropertyToken? propertyToken)
         {
             var textLength = text.Length;
 
@@ -256,7 +265,13 @@ namespace TheDialgaTeam.Core.Logger.Formatter
                 }
                 else
                 {
-                    textWriter.Write(new string(' ', amountToPad));
+                    textWriter.Write(string.Create(amountToPad, amountToPad, (span, length) =>
+                    {
+                        for (var i = 0; i < length; i++)
+                        {
+                            span[i] = ' ';
+                        }
+                    }));
                 }
 
                 if (alignment.Direction == AlignmentDirection.Right)

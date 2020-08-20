@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using YouTubePlays.Discord.Bot.Discord.Command;
@@ -10,7 +11,7 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
     {
         private readonly ChatBot _chatBot;
 
-        public ChatBotModule(ChatBot chatBot)
+        public ChatBotModule(ChatBot chatBot, CancellationTokenSource cancellationTokenSource) : base(cancellationTokenSource)
         {
             _chatBot = chatBot;
         }
@@ -19,16 +20,18 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
         [Summary("Get current chat bot configuration.")]
         public async Task GetChatBotConfigAsync()
         {
+            var chatBot = _chatBot;
+
             var config = new EmbedBuilder()
                 .WithTitle("Current Chat Bot Configuration:")
                 .WithColor(Color.Green)
-                .WithDescription($@"Input Limit: {_chatBot.InputLimit}
-Touch Availability: {_chatBot.TouchAvailable}
-Touch X Offset: {_chatBot.TouchXOffset}
-Touch Y Offset: {_chatBot.TouchYOffset}")
+                .WithDescription($@"Input Limit: {chatBot.InputLimit}
+Touch Availability: {chatBot.TouchAvailable}
+Touch X Offset: {chatBot.TouchXOffset}
+Touch Y Offset: {chatBot.TouchYOffset}")
                 .Build();
 
-            await ReplyAsync(null, false, config).ConfigureAwait(false);
+            await ReplyAsync(config).ConfigureAwait(false);
         }
 
         [Command("SetChatBotInputLimit")]

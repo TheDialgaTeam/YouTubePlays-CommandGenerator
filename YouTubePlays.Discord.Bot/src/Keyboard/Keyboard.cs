@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using YouTubePlays.Discord.Bot.Keyboard.Options;
 
 namespace YouTubePlays.Discord.Bot.Keyboard
 {
@@ -10,13 +11,13 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 
         public abstract string ShortKey { get; }
 
-        public abstract KeyboardOptions KeyboardOptions { get; }
+        protected abstract KeyboardOptions KeyboardOptions { get; }
 
-        public abstract TouchOptions TouchOptions { get; }
+        protected abstract TouchOptions TouchOptions { get; }
 
-        public abstract int NameLength { get; }
+        protected abstract int NameLength { get; }
 
-        public abstract Dictionary<string, KeyMapping[]> CharMappings { get; }
+        protected abstract Dictionary<string, KeyMapping[]> CharMappings { get; }
 
         public string GetChatCommand(string name, ChatBot chatBot)
         {
@@ -25,8 +26,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 
         private string GetKeyboardCommand(string name)
         {
-            var nameSpan = name.AsSpan();
-            var nameLength = nameSpan.Length;
+            var nameLength = name.Length;
 
             var keyboardCommand = new StringBuilder(KeyboardOptions.PreExecuteCommand);
 
@@ -39,7 +39,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
             {
                 if (currentNameLength + 1 > NameLength) throw new Exception("Name length exceeded.");
 
-                var character = nameSpan[currentIndex];
+                var character = name[currentIndex];
 
                 if (character != '<')
                 {
@@ -57,10 +57,9 @@ namespace YouTubePlays.Discord.Bot.Keyboard
                 else
                 {
                     // There are escape char.
-                    var escapeSpan = nameSpan.Slice(currentIndex);
-                    var charmapSpan = escapeSpan.Slice(0, escapeSpan.IndexOf('>') + 1);
+                    var escapeChar = name.Substring(currentIndex, name.IndexOf('>') + 1);
 
-                    if (CharMappings.TryGetValue(charmapSpan.ToString(), out var keyMappings))
+                    if (CharMappings.TryGetValue(escapeChar, out var keyMappings))
                     {
                         var (targetKeyMapping, command) = GetNearestKeyboardCharMap(currentMode, currentPosition, keyMappings);
                         currentPosition = (targetKeyMapping.X, targetKeyMapping.Y);
@@ -69,11 +68,13 @@ namespace YouTubePlays.Discord.Bot.Keyboard
                         keyboardCommand.Append(command);
                     }
 
-                    currentIndex += charmapSpan.Length;
+                    currentIndex += escapeChar.Length;
                 }
 
                 currentNameLength++;
             }
+
+            if (string.IsNullOrWhiteSpace(KeyboardOptions.PostExecuteCommand)) return keyboardCommand.ToString();
 
             keyboardCommand.Append(",");
             keyboardCommand.AppendLine(KeyboardOptions.PostExecuteCommand);
@@ -124,14 +125,14 @@ namespace YouTubePlays.Discord.Bot.Keyboard
                     {
                         command.Append(",");
                         command.Append(keyboardOptions.PostModeSwitchCommand);
-                    }
 
-                    var (postModeSwitchPositionX, postModeSwitchPositionY) = keyboardOptions.PostModeSwitchPosition[keyMapping.Mode];
+                        var (postModeSwitchPositionX, postModeSwitchPositionY) = keyboardOptions.PostModeSwitchPosition[keyMapping.Mode];
 
-                    if (postModeSwitchPositionX != -1 && postModeSwitchPositionY != -1)
-                    {
-                        x = postModeSwitchPositionX;
-                        y = postModeSwitchPositionY;
+                        if (postModeSwitchPositionX != -1 && postModeSwitchPositionY != -1)
+                        {
+                            x = postModeSwitchPositionX;
+                            y = postModeSwitchPositionY;
+                        }
                     }
 
                     // Location adjustment because the keymap size is different.
@@ -141,76 +142,124 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 
                 if (keyMapping.X > x)
                 {
-                    var distanceRight = keyMapping.X - x;
-                    var distanceLeft = x + 1 + (keyMapSizeX - keyMapping.X);
-
-                    if (distanceRight > distanceLeft)
+                    if (keyboardOptions.WarpXPosition)
                     {
-                        command.Append(",lt");
-                        if (distanceLeft > 1) command.Append(distanceLeft);
+                        var distanceRight = keyMapping.X - x;
+                        var distanceLeft = x + 1 + (keyMapSizeX - keyMapping.X);
+
+                        if (distanceRight > distanceLeft)
+                        {
+                            command.Append(",lt");
+                            if (distanceLeft > 1) command.Append(distanceLeft);
+                        }
+                        else
+                        {
+                            command.Append(",rt");
+                            if (distanceRight > 1) command.Append(distanceRight);
+                        }
+
+                        totalDistance += Math.Min(distanceRight, distanceLeft);
                     }
                     else
                     {
+                        var distanceRight = keyMapping.X - x;
+
                         command.Append(",rt");
                         if (distanceRight > 1) command.Append(distanceRight);
-                    }
 
-                    totalDistance += Math.Min(distanceRight, distanceLeft);
+                        totalDistance += distanceRight;
+                    }
                 }
                 else if (keyMapping.X < x)
                 {
-                    var distanceLeft = x - keyMapping.X;
-                    var distanceRight = keyMapSizeX - x + 1 + keyMapping.X;
-
-                    if (distanceLeft > distanceRight)
+                    if (keyboardOptions.WarpXPosition)
                     {
-                        command.Append(",rt");
-                        if (distanceRight > 1) command.Append(distanceRight);
+                        var distanceLeft = x - keyMapping.X;
+                        var distanceRight = keyMapSizeX - x + 1 + keyMapping.X;
+
+                        if (distanceLeft > distanceRight)
+                        {
+                            command.Append(",rt");
+                            if (distanceRight > 1) command.Append(distanceRight);
+                        }
+                        else
+                        {
+                            command.Append(",lt");
+                            if (distanceLeft > 1) command.Append(distanceLeft);
+                        }
+
+                        totalDistance += Math.Min(distanceLeft, distanceRight);
                     }
                     else
                     {
+                        var distanceLeft = x - keyMapping.X;
+
                         command.Append(",lt");
                         if (distanceLeft > 1) command.Append(distanceLeft);
-                    }
 
-                    totalDistance += Math.Min(distanceLeft, distanceRight);
+                        totalDistance += distanceLeft;
+                    }
                 }
 
                 if (keyMapping.Y > y)
                 {
-                    var distanceDown = keyMapping.Y - y;
-                    var distanceUp = y + 1 + (keyMapSizeY - keyMapping.Y);
-
-                    if (distanceDown > distanceUp)
+                    if (keyboardOptions.WarpYPosition)
                     {
-                        command.Append(",u");
-                        if (distanceUp > 1) command.Append(distanceUp);
+                        var distanceDown = keyMapping.Y - y;
+                        var distanceUp = y + 1 + (keyMapSizeY - keyMapping.Y);
+
+                        if (distanceDown > distanceUp)
+                        {
+                            command.Append(",u");
+                            if (distanceUp > 1) command.Append(distanceUp);
+                        }
+                        else
+                        {
+                            command.Append(",d");
+                            if (distanceDown > 1) command.Append(distanceDown);
+                        }
+
+                        totalDistance += Math.Min(distanceDown, distanceUp);
                     }
                     else
                     {
+                        var distanceDown = keyMapping.Y - y;
+
                         command.Append(",d");
                         if (distanceDown > 1) command.Append(distanceDown);
-                    }
 
-                    totalDistance += Math.Min(distanceDown, distanceUp);
+                        totalDistance += distanceDown;
+                    }
                 }
                 else if (keyMapping.Y < y)
                 {
-                    var distanceUp = y - keyMapping.Y;
-                    var distanceDown = keyMapSizeY - y + 1 + keyMapping.Y;
-
-                    if (distanceUp > distanceDown)
+                    if (keyboardOptions.WarpYPosition)
                     {
-                        command.Append(",d");
-                        if (distanceDown > 1) command.Append(distanceDown);
+                        var distanceUp = y - keyMapping.Y;
+                        var distanceDown = keyMapSizeY - y + 1 + keyMapping.Y;
+
+                        if (distanceUp > distanceDown)
+                        {
+                            command.Append(",d");
+                            if (distanceDown > 1) command.Append(distanceDown);
+                        }
+                        else
+                        {
+                            command.Append(",u");
+                            if (distanceUp > 1) command.Append(distanceUp);
+                        }
+
+                        totalDistance += Math.Min(distanceUp, distanceDown);
                     }
                     else
                     {
+                        var distanceUp = y - keyMapping.Y;
+
                         command.Append(",u");
                         if (distanceUp > 1) command.Append(distanceUp);
-                    }
 
-                    totalDistance += Math.Min(distanceUp, distanceDown);
+                        totalDistance += distanceUp;
+                    }
                 }
 
                 command.Append(",a");
@@ -236,8 +285,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 
         private string GetTouchCommand(string name, ChatBot chatBot)
         {
-            var nameSpan = name.AsSpan();
-            var nameLength = nameSpan.Length;
+            var nameLength = name.Length;
 
             var keyboardCommand = new StringBuilder(TouchOptions.PreExecuteCommand);
 
@@ -249,7 +297,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
             {
                 if (currentNameLength + 1 > NameLength) throw new Exception("Name length exceeded.");
 
-                var character = nameSpan[currentIndex];
+                var character = name[currentIndex];
 
                 if (character != '<')
                 {
@@ -266,10 +314,9 @@ namespace YouTubePlays.Discord.Bot.Keyboard
                 else
                 {
                     // There are escape char.
-                    var escapeSpan = nameSpan.Slice(currentIndex);
-                    var charmapSpan = escapeSpan.Slice(0, escapeSpan.IndexOf('>') + 1);
+                    var escapeChar = name.Substring(currentIndex, name.IndexOf('>') + 1);
 
-                    if (CharMappings.TryGetValue(charmapSpan.ToString(), out var keyMappings))
+                    if (CharMappings.TryGetValue(escapeChar, out var keyMappings))
                     {
                         var (targetKeyMapping, command) = GetNearestTouchCharMap(currentMode, keyMappings, chatBot);
                         currentMode = targetKeyMapping.Mode;
@@ -277,11 +324,16 @@ namespace YouTubePlays.Discord.Bot.Keyboard
                         keyboardCommand.Append(command);
                     }
 
-                    currentIndex += charmapSpan.Length;
+                    currentIndex += escapeChar.Length;
                 }
+
+                currentNameLength++;
             }
 
-            keyboardCommand.Append(",st,a");
+            if (string.IsNullOrWhiteSpace(TouchOptions.PostExecuteCommand)) return keyboardCommand.ToString();
+
+            keyboardCommand.Append(",");
+            keyboardCommand.AppendLine(TouchOptions.PostExecuteCommand);
 
             return keyboardCommand.ToString();
         }
