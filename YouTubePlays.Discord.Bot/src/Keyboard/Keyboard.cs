@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using YouTubePlays.Discord.Bot.EntityFramework.Table;
 using YouTubePlays.Discord.Bot.Keyboard.Options;
 
 namespace YouTubePlays.Discord.Bot.Keyboard
@@ -19,9 +20,9 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 
         protected abstract Dictionary<string, KeyMapping[]> CharMappings { get; }
 
-        public string GetChatCommand(string name, ChatBot chatBot)
+        public string GetChatCommand(string name, ChannelSettings channelSettings)
         {
-            return TouchOptions.TouchAvailable && chatBot.TouchAvailable ? GetTouchCommand(name, chatBot) : GetKeyboardCommand(name);
+            return TouchOptions.TouchAvailable && channelSettings.TouchAvailable ? GetTouchCommand(name, channelSettings) : GetKeyboardCommand(name);
         }
 
         private string GetKeyboardCommand(string name)
@@ -283,7 +284,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
             return (bestMapping, distanceAndCommand.command);
         }
 
-        private string GetTouchCommand(string name, ChatBot chatBot)
+        private string GetTouchCommand(string name, ChannelSettings channelSettings)
         {
             var nameLength = name.Length;
 
@@ -303,7 +304,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
                 {
                     if (CharMappings.TryGetValue(character.ToString(), out var keyMappings))
                     {
-                        var (targetKeyMapping, command) = GetNearestTouchCharMap(currentMode, keyMappings, chatBot);
+                        var (targetKeyMapping, command) = GetNearestTouchCharMap(currentMode, keyMappings, channelSettings);
                         currentMode = targetKeyMapping.Mode;
 
                         keyboardCommand.Append(command);
@@ -318,7 +319,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 
                     if (CharMappings.TryGetValue(escapeChar, out var keyMappings))
                     {
-                        var (targetKeyMapping, command) = GetNearestTouchCharMap(currentMode, keyMappings, chatBot);
+                        var (targetKeyMapping, command) = GetNearestTouchCharMap(currentMode, keyMappings, channelSettings);
                         currentMode = targetKeyMapping.Mode;
 
                         keyboardCommand.Append(command);
@@ -338,9 +339,9 @@ namespace YouTubePlays.Discord.Bot.Keyboard
             return keyboardCommand.ToString();
         }
 
-        private (KeyMapping keyMapping, string command) GetNearestTouchCharMap(int currentMode, KeyMapping[] keyMappings, ChatBot chatbot)
+        private (KeyMapping keyMapping, string command) GetNearestTouchCharMap(int currentMode, KeyMapping[] keyMappings, ChannelSettings channelSettings)
         {
-            var getDistanceAndCommand = new Func<int, KeyMapping, TouchOptions, ChatBot, (int totalDistance, string command)>((mode, keyMapping, touchOptions, bot) =>
+            var getDistanceAndCommand = new Func<int, KeyMapping, TouchOptions, ChannelSettings, (int totalDistance, string command)>((mode, keyMapping, touchOptions, settings) =>
             {
                 var totalDistance = 1;
                 var command = new StringBuilder();
@@ -352,25 +353,31 @@ namespace YouTubePlays.Discord.Bot.Keyboard
                     var (x, y) = touchOptions.ModeSwitchButton[keyMapping.Mode];
 
                     command.Append(",t:");
-                    command.Append(x + bot.TouchXOffset);
+                    command.Append(x + settings.TouchXOffset);
                     command.Append(":");
-                    command.Append(y + bot.TouchYOffset);
+                    command.Append(y + settings.TouchYOffset);
+
+                    if (touchOptions.ModeSwitchDelay > 0)
+                    {
+                        command.Append(",p");
+                        command.Append(touchOptions.ModeSwitchDelay);
+                    }
                 }
 
                 command.Append(",t:");
-                command.Append(keyMapping.TouchX + bot.TouchXOffset);
+                command.Append(keyMapping.TouchX + settings.TouchXOffset);
                 command.Append(":");
-                command.Append(keyMapping.TouchY + bot.TouchYOffset);
+                command.Append(keyMapping.TouchY + settings.TouchYOffset);
 
                 return (totalDistance, command.ToString());
             });
 
             var bestMapping = keyMappings[0];
-            var distanceAndCommand = getDistanceAndCommand(currentMode, bestMapping, TouchOptions, chatbot);
+            var distanceAndCommand = getDistanceAndCommand(currentMode, bestMapping, TouchOptions, channelSettings);
 
             for (var i = 1; i < keyMappings.Length; i++)
             {
-                var targetDistanceAndCommand = getDistanceAndCommand(currentMode, keyMappings[i], TouchOptions, chatbot);
+                var targetDistanceAndCommand = getDistanceAndCommand(currentMode, keyMappings[i], TouchOptions, channelSettings);
 
                 if (targetDistanceAndCommand.totalDistance >= distanceAndCommand.totalDistance) continue;
 

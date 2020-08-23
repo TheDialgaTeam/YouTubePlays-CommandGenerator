@@ -1,4 +1,6 @@
-﻿namespace YouTubePlays.Discord.Bot.Keyboard
+﻿using YouTubePlays.Discord.Bot.EntityFramework.Table;
+
+namespace YouTubePlays.Discord.Bot.Keyboard
 {
     public interface IKeyboard
     {
@@ -6,6 +8,6 @@
 
         string ShortKey { get; }
 
-        string GetChatCommand(string name, ChatBot chatBot);
+        string GetChatCommand(string name, ChannelSettings channelSettings);
     }
 }

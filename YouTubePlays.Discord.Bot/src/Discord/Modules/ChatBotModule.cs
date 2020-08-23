@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -7,28 +8,26 @@ using YouTubePlays.Discord.Bot.Discord.Command;
 namespace YouTubePlays.Discord.Bot.Discord.Modules
 {
     [Name("Chat Bot")]
+    [RequireContext(ContextType.Guild)]
     public class ChatBotModule : AbstractModule
     {
-        private readonly ChatBot _chatBot;
-
-        public ChatBotModule(ChatBot chatBot, CancellationTokenSource cancellationTokenSource) : base(cancellationTokenSource)
+        public ChatBotModule(IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource) : base(serviceProvider, cancellationTokenSource)
         {
-            _chatBot = chatBot;
         }
 
         [Command("GetChatBotConfig", true)]
         [Summary("Get current chat bot configuration.")]
         public async Task GetChatBotConfigAsync()
         {
-            var chatBot = _chatBot;
+            var channelSettings = await GetChannelSettingsAsync().ConfigureAwait(false);
 
             var config = new EmbedBuilder()
                 .WithTitle("Current Chat Bot Configuration:")
                 .WithColor(Color.Green)
-                .WithDescription($@"Input Limit: {chatBot.InputLimit}
-Touch Availability: {chatBot.TouchAvailable}
-Touch X Offset: {chatBot.TouchXOffset}
-Touch Y Offset: {chatBot.TouchYOffset}")
+                .WithDescription($@"Input Limit: {channelSettings.InputLimit}
+Touch Availability: {channelSettings.TouchAvailable}
+Touch X Offset: {channelSettings.TouchXOffset}
+Touch Y Offset: {channelSettings.TouchYOffset}")
                 .Build();
 
             await ReplyAsync(config).ConfigureAwait(false);
@@ -47,7 +46,10 @@ Touch Y Offset: {chatBot.TouchYOffset}")
                 return;
             }
 
-            _chatBot.InputLimit = inputLimit;
+            var channelSettings = await GetChannelSettingsAsync().ConfigureAwait(false);
+            channelSettings.InputLimit = inputLimit;
+            await SqliteContext.SaveChangesAsync().ConfigureAwait(false);
+
             await ReplyAsync(CommandExecuteResult.FromSuccess($"Successfully changed input limit to {inputLimit}").BuildDiscordTextResponse()).ConfigureAwait(false);
         }
 
@@ -56,7 +58,10 @@ Touch Y Offset: {chatBot.TouchYOffset}")
         [RequirePermission(RequiredPermission.GuildAdministrator)]
         public async Task EnableChatBotTouchAsync()
         {
-            _chatBot.TouchAvailable = true;
+            var channelSettings = await GetChannelSettingsAsync().ConfigureAwait(false);
+            channelSettings.TouchAvailable = true;
+            await SqliteContext.SaveChangesAsync().ConfigureAwait(false);
+
             await ReplyAsync(CommandExecuteResult.FromSuccess("Successfully enabled touch commands.").BuildDiscordTextResponse()).ConfigureAwait(false);
         }
 
@@ -65,7 +70,10 @@ Touch Y Offset: {chatBot.TouchYOffset}")
         [RequirePermission(RequiredPermission.GuildAdministrator)]
         public async Task DisableChatBotTouchAsync()
         {
-            _chatBot.TouchAvailable = false;
+            var channelSettings = await GetChannelSettingsAsync().ConfigureAwait(false);
+            channelSettings.TouchAvailable = false;
+            await SqliteContext.SaveChangesAsync().ConfigureAwait(false);
+
             await ReplyAsync(CommandExecuteResult.FromSuccess("Successfully disabled touch commands.").BuildDiscordTextResponse()).ConfigureAwait(false);
         }
 
@@ -81,7 +89,10 @@ Touch Y Offset: {chatBot.TouchYOffset}")
                 return;
             }
 
-            _chatBot.TouchXOffset = offset;
+            var channelSettings = await GetChannelSettingsAsync().ConfigureAwait(false);
+            channelSettings.TouchXOffset = offset;
+            await SqliteContext.SaveChangesAsync().ConfigureAwait(false);
+
             await ReplyAsync(CommandExecuteResult.FromSuccess($"Successfully changed touch x coordinate offset to {offset}").BuildDiscordTextResponse()).ConfigureAwait(false);
         }
 
@@ -97,7 +108,10 @@ Touch Y Offset: {chatBot.TouchYOffset}")
                 return;
             }
 
-            _chatBot.TouchYOffset = offset;
+            var channelSettings = await GetChannelSettingsAsync().ConfigureAwait(false);
+            channelSettings.TouchYOffset = offset;
+            await SqliteContext.SaveChangesAsync().ConfigureAwait(false);
+
             await ReplyAsync(CommandExecuteResult.FromSuccess($"Successfully changed touch y coordinate offset to {offset}").BuildDiscordTextResponse()).ConfigureAwait(false);
         }
     }

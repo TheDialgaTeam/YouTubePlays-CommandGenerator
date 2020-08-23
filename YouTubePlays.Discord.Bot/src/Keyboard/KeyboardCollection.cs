@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using YouTubePlays.Discord.Bot.EntityFramework.Table;
 
 namespace YouTubePlays.Discord.Bot.Keyboard
 {
@@ -11,24 +12,35 @@ namespace YouTubePlays.Discord.Bot.Keyboard
             new Generation1Keyboard(),
             new Generation2Keyboard(),
             new Generation3Keyboard(),
+            new Generation4Keyboard(),
             new Generation5Keyboard(),
+            new Generation6Keyboard(),
             new Generation7Keyboard()
         };
 
-        public IKeyboard CurrentKeyboard { get; set; }
-
-        public KeyboardCollection()
+        public bool TryGetKeyboard(string key, out IKeyboard keyboard)
         {
-            CurrentKeyboard = Keyboards[0];
+            foreach (var currentKeyboard in Keyboards)
+            {
+                if (!currentKeyboard.ShortKey.Equals(key, StringComparison.OrdinalIgnoreCase)) continue;
+                
+                keyboard = currentKeyboard;
+                return true;
+            }
+
+            keyboard = new Generation1Keyboard();
+            return false;
         }
 
-        public string[] GetCommands(string name, ChatBot chatBot)
+        public string[] GetCommands(string name, ChannelSettings channelSettings)
         {
             var result = new List<string>();
             var commandBuilder = new StringBuilder();
             var currentIndex = 0;
 
-            var fullCommand = CurrentKeyboard.GetChatCommand(name, chatBot).Split(',');
+            if (!TryGetKeyboard(channelSettings.KeyboardType, out var keyboard)) return new string[0];
+
+            var fullCommand = keyboard.GetChatCommand(name, channelSettings).Split(',');
 
             foreach (var command in fullCommand)
             {
@@ -43,7 +55,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 
                     while (amount > 0)
                     {
-                        var amountToFill = chatBot.InputLimit - currentIndex;
+                        var amountToFill = channelSettings.InputLimit - currentIndex;
 
                         if (amount <= amountToFill)
                         {
@@ -72,7 +84,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
                     currentIndex++;
                 }
 
-                if (currentIndex != chatBot.InputLimit) continue;
+                if (currentIndex != channelSettings.InputLimit) continue;
 
                 result.Add(commandBuilder.ToString());
                 commandBuilder.Clear();

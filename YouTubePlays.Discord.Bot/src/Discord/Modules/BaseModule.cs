@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -8,7 +9,7 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
     [Name("Base")]
     public class BaseModule : AbstractModule
     {
-        public BaseModule(CancellationTokenSource cancellationTokenSource) : base(cancellationTokenSource)
+        public BaseModule(IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource) : base(serviceProvider, cancellationTokenSource)
         {
         }
 

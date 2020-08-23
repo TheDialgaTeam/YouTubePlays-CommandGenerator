@@ -24,7 +24,7 @@ namespace YouTubePlays.Discord.Bot.Discord.Command
                 }
 
                 return Regex.IsMatch(inputState!, EmojiPattern) ? TypeReaderResult.FromSuccess(new Emoji(inputState)) : TypeReaderResult.FromError(CommandError.ParseFailed, "Emoji not found!");
-            }, input, services.GetService<CancellationTokenSource>().Token, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+            }, input, services.GetRequiredService<CancellationTokenSource>().Token, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
     }
 }

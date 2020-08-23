@@ -12,12 +12,10 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
     public class KeyboardModule : AbstractModule
     {
         private readonly KeyboardCollection _keyboardCollection;
-        private readonly ChatBot _chatBot;
 
-        public KeyboardModule(KeyboardCollection keyboardCollection, ChatBot chatBot, CancellationTokenSource cancellationTokenSource) : base(cancellationTokenSource)
+        public KeyboardModule(KeyboardCollection keyboardCollection, IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource) : base(serviceProvider, cancellationTokenSource)
         {
             _keyboardCollection = keyboardCollection;
-            _chatBot = chatBot;
         }
 
         [Command("GetAvailableKeyboard")]
@@ -39,36 +37,41 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
         [Command("GetCurrentKeyboard", true)]
         [Alias("CurrentKeyboard")]
         [Summary("Get the current keyboard.")]
+        [RequireContext(ContextType.Guild)]
         public async Task GetCurrentKeyboardAsync()
         {
-            await ReplyAsync($"The current keyboard is: {_keyboardCollection.CurrentKeyboard.Name}").ConfigureAwait(false);
+            var channelSettings = await GetChannelSettingsAsync().ConfigureAwait(false);
+
+            if (_keyboardCollection.TryGetKeyboard(channelSettings.KeyboardType, out var keyboard))
+            {
+                await ReplyAsync($"The current keyboard is: {keyboard.Name}").ConfigureAwait(false);
+            }
+            else
+            {
+                await ReplyAsync(CommandExecuteResult.FromError("Unable to get the current keyboard.").BuildDiscordTextResponse()).ConfigureAwait(false);
+            }
+            
         }
 
         [Command("SetCurrentKeyboard")]
         [Alias("SetKeyboard")]
         [Summary("Set the current keyboard.")]
         [Example("SetCurrentKeyboard 5")]
+        [RequireContext(ContextType.Guild)]
         public async Task SetCurrentKeyboardAsync([Summary("Keyboard to set.")] [Remainder]
             string keyboardCode)
         {
-            var isAvailable = false;
-
-            foreach (var keyboard in _keyboardCollection.Keyboards)
-            {
-                if (!keyboard.ShortKey.Equals(keyboardCode, StringComparison.OrdinalIgnoreCase)) continue;
-
-                isAvailable = true;
-                _keyboardCollection.CurrentKeyboard = keyboard;
-                break;
-            }
-
-            if (!isAvailable)
+            if (!_keyboardCollection.TryGetKeyboard(keyboardCode, out var keyboard))
             {
                 await ReplyAsync(CommandExecuteResult.FromError("Invalid keyboard.").BuildDiscordTextResponse()).ConfigureAwait(false);
             }
             else
             {
-                await ReplyAsync(CommandExecuteResult.FromSuccess($"Changed keyboard to: {_keyboardCollection.CurrentKeyboard.Name}").BuildDiscordTextResponse()).ConfigureAwait(false);
+                var channelSettings = await GetChannelSettingsAsync().ConfigureAwait(false);
+                channelSettings.KeyboardType = keyboard.ShortKey;
+                await SqliteContext.SaveChangesAsync().ConfigureAwait(false);
+
+                await ReplyAsync(CommandExecuteResult.FromSuccess($"Changed keyboard to: {keyboard.Name}").BuildDiscordTextResponse()).ConfigureAwait(false);
             }
         }
 
@@ -76,12 +79,16 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
         [Alias("Name", "Command")]
         [Summary("Get keyboard command.")]
         [Example("GetKeyboardCommand test")]
+        [RequireContext(ContextType.Guild)]
         public async Task GetKeyboardCommandAsync([Summary("Keys on the keyboard.")] [Remainder]
             string keys)
         {
             try
             {
-                var result = _keyboardCollection.GetCommands(keys, _chatBot);
+                var channelSettings = await GetChannelSettingsAsync().ConfigureAwait(false);
+                var result = _keyboardCollection.GetCommands(keys, channelSettings);
+
+                if (result.Length == 0) throw new Exception("Unexpected error occurred.");
 
                 await ReplyAsync("Here is the command to enter this name in ytp:").ConfigureAwait(false);
 

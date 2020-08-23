@@ -1,8 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <AssemblyName>YouTubePlays.Discord.Bot</AssemblyName>
+    <RootNamespace>YouTubePlays.Discord.Bot</RootNamespace>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <PackageId>YouTubePlays.Discord.Bot</PackageId>
+    <Version>0.2.0.0</Version>
+    <Authors>Yong Jian Ming</Authors>
+    <Company>TheDialgaTeam</Company>
+    <Product>YouTubePlays.Discord.Bot</Product>
+    <Description>YouTubePlays Command Generator.</Description>
+    <PackageProjectUrl>https://github.com/TheDialgaTeam/YouTubePlays.Discord.Bot</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/TheDialgaTeam/YouTubePlays.Discord.Bot</RepositoryUrl>
+    <Platforms>AnyCPU;x64;x86</Platforms>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
@@ -20,13 +31,27 @@
   <ItemGroup>
     <PackageReference Include="Discord.Net.Commands" Version="2.2.0" />
     <PackageReference Include="Discord.Net.WebSocket" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.7" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="3.1.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.Async" Version="1.4.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\TheDialgaTeam.Core.DependencyInjection\src\TheDialgaTeam.Core.DependencyInjection.csproj" />
     <ProjectReference Include="..\..\TheDialgaTeam.Core.Logger\src\TheDialgaTeam.Core.Logger.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </None>
   </ItemGroup>
 
 </Project>

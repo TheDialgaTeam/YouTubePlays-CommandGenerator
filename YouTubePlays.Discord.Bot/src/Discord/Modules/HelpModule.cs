@@ -15,7 +15,7 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
         private readonly CommandService _commandService;
         private readonly IServiceProvider _serviceProvider;
 
-        public HelpModule(CommandService commandService, IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource) : base(cancellationTokenSource)
+        public HelpModule(CommandService commandService, IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource) : base(serviceProvider, cancellationTokenSource)
         {
             _commandService = commandService;
             _serviceProvider = serviceProvider;

@@ -8,6 +8,8 @@
 
         public string PostExecuteCommand { get; set; } = "st,a";
 
+        public int ModeSwitchDelay { get; set; }
+
         public (int x, int y)[] ModeSwitchButton { get; set; } = { (-1, -1) };
     }
 }
