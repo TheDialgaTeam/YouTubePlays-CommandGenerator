@@ -50,7 +50,6 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
             {
                 await ReplyAsync(CommandExecuteResult.FromError("Unable to get the current keyboard.").BuildDiscordTextResponse()).ConfigureAwait(false);
             }
-            
         }
 
         [Command("SetCurrentKeyboard")]

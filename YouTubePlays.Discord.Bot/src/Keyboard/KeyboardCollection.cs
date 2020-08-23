@@ -8,7 +8,8 @@ namespace YouTubePlays.Discord.Bot.Keyboard
 {
     public class KeyboardCollection
     {
-        public IKeyboard[] Keyboards { get; } = {
+        public IKeyboard[] Keyboards { get; } =
+        {
             new Generation1Keyboard(),
             new Generation2Keyboard(),
             new Generation3Keyboard(),
@@ -23,7 +24,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
             foreach (var currentKeyboard in Keyboards)
             {
                 if (!currentKeyboard.ShortKey.Equals(key, StringComparison.OrdinalIgnoreCase)) continue;
-                
+
                 keyboard = currentKeyboard;
                 return true;
             }

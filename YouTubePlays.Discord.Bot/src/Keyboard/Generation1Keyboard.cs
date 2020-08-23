@@ -100,7 +100,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
             { "<FEMALE>", new[] { new KeyMapping(0, 4, 4), new KeyMapping(1, 4, 4) } },
             { "/", new[] { new KeyMapping(0, 5, 4), new KeyMapping(1, 5, 4) } },
             { ".", new[] { new KeyMapping(0, 6, 4), new KeyMapping(1, 6, 4) } },
-            { ",", new[] { new KeyMapping(0, 7, 4), new KeyMapping(1, 7, 4) } },
+            { ",", new[] { new KeyMapping(0, 7, 4), new KeyMapping(1, 7, 4) } }
         };
     }
 }

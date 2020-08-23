@@ -7,8 +7,8 @@ namespace YouTubePlays.Discord.Bot.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ChannelSettingsTable",
-                columns: table => new
+                "ChannelSettingsTable",
+                table => new
                 {
                     ChannelId = table.Column<ulong>(nullable: false),
                     KeyboardType = table.Column<string>(nullable: false),
@@ -17,16 +17,13 @@ namespace YouTubePlays.Discord.Bot.Migrations
                     TouchXOffset = table.Column<int>(nullable: false),
                     TouchYOffset = table.Column<int>(nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ChannelSettingsTable", x => x.ChannelId);
-                });
+                constraints: table => { table.PrimaryKey("PK_ChannelSettingsTable", x => x.ChannelId); });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ChannelSettingsTable");
+                "ChannelSettingsTable");
         }
     }
 }

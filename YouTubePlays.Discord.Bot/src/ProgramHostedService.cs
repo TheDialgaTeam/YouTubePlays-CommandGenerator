@@ -27,7 +27,7 @@ namespace YouTubePlays.Discord.Bot
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             var frameworkVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
 
-            System.Console.Title = $"YouTubePlays Command Generator Bot v{version} ({frameworkVersion})";
+            Console.Title = $"YouTubePlays Command Generator Bot v{version} ({frameworkVersion})";
 
             _logger.LogInformation("==================================================");
             _logger.LogInformation("YouTubePlays Command Generator Bot v{version:l} {frameworkVersion:l}", version, frameworkVersion);
