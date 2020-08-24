@@ -3,7 +3,7 @@ using YouTubePlays.Discord.Bot.Keyboard.Options;
 
 namespace YouTubePlays.Discord.Bot.Keyboard
 {
-    public class Generation1Keyboard : Keyboard
+    public class Generation1Keyboard : AbstractKeyboard
     {
         public override string Name { get; } = "Generation 1 (Red, Blue and Yellow)";
 

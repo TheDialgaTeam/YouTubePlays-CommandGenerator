@@ -1,17 +1,16 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Hosting;
 using YouTubePlays.Discord.Bot.Discord.Command;
 
 namespace YouTubePlays.Discord.Bot.Discord.Modules
 {
     [Name("Chat Bot")]
     [RequireContext(ContextType.Guild)]
-    public class ChatBotModule : AbstractModule
+    public class ChatBotModule : AbstractSqliteContextModule
     {
-        public ChatBotModule(IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource) : base(serviceProvider, cancellationTokenSource)
+        public ChatBotModule(IHostApplicationLifetime hostApplicationLifetime) : base(hostApplicationLifetime)
         {
         }
 

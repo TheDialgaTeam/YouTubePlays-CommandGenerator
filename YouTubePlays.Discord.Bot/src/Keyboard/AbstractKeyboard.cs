@@ -6,7 +6,7 @@ using YouTubePlays.Discord.Bot.Keyboard.Options;
 
 namespace YouTubePlays.Discord.Bot.Keyboard
 {
-    public abstract class Keyboard : IKeyboard
+    public abstract class AbstractKeyboard : IKeyboard
     {
         public abstract string Name { get; }
 

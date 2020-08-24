@@ -1,15 +1,14 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Hosting;
 
 namespace YouTubePlays.Discord.Bot.Discord.Modules
 {
     [Name("Base")]
     public class BaseModule : AbstractModule
     {
-        public BaseModule(IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource) : base(serviceProvider, cancellationTokenSource)
+        public BaseModule(IHostApplicationLifetime hostApplicationLifetime) : base(hostApplicationLifetime)
         {
         }
 

@@ -1,53 +1,22 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
-using YouTubePlays.Discord.Bot.EntityFramework;
-using YouTubePlays.Discord.Bot.EntityFramework.Table;
+using Microsoft.Extensions.Hosting;
+using YouTubePlays.Discord.Bot.Discord.Command;
 
 namespace YouTubePlays.Discord.Bot.Discord.Modules
 {
-    public abstract class AbstractModule : ModuleBase<ShardedCommandContext>
+    public abstract class AbstractModule : ModuleBase<ShardedCommandScopeContext>
     {
-        protected SqliteContext SqliteContext;
-        protected CancellationToken CancellationToken;
+        protected readonly IHostApplicationLifetime HostApplicationLifetime;
 
-        private readonly IServiceScope _serviceScope;
         private readonly RequestOptions _requestOptions;
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-        protected AbstractModule(IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource)
+        protected AbstractModule(IHostApplicationLifetime hostApplicationLifetime)
         {
-            _serviceScope = serviceProvider.CreateScope();
-            CancellationToken = cancellationTokenSource.Token;
-            _requestOptions = new RequestOptions { CancelToken = cancellationTokenSource.Token };
-        }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-
-        protected override void BeforeExecute(CommandInfo command)
-        {
-            SqliteContext = _serviceScope.ServiceProvider.GetRequiredService<SqliteContext>();
-        }
-
-        protected override void AfterExecute(CommandInfo command)
-        {
-            _serviceScope.Dispose();
-        }
-
-        protected async Task<ChannelSettings> GetChannelSettingsAsync()
-        {
-            var channelSettings = await SqliteContext.ChannelSettingsTable.FindAsync(Context.Channel.Id).ConfigureAwait(false);
-            if (channelSettings != null) return channelSettings;
-
-            channelSettings = new ChannelSettings { ChannelId = Context.Channel.Id };
-
-            await SqliteContext.ChannelSettingsTable.AddAsync(channelSettings, CancellationToken).ConfigureAwait(false);
-            await SqliteContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
-
-            return channelSettings;
+            HostApplicationLifetime = hostApplicationLifetime;
+            _requestOptions = new RequestOptions { CancelToken = hostApplicationLifetime.ApplicationStopping };
         }
 
         protected async Task<IUserMessage?> ReplyAsync(string message, bool isTTS = false)

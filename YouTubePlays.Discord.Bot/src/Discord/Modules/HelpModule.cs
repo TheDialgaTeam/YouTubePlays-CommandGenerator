@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Microsoft.Extensions.Hosting;
 using YouTubePlays.Discord.Bot.Discord.Command;
 
 namespace YouTubePlays.Discord.Bot.Discord.Modules
@@ -15,7 +15,7 @@ namespace YouTubePlays.Discord.Bot.Discord.Modules
         private readonly CommandService _commandService;
         private readonly IServiceProvider _serviceProvider;
 
-        public HelpModule(CommandService commandService, IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource) : base(serviceProvider, cancellationTokenSource)
+        public HelpModule(CommandService commandService, IServiceProvider serviceProvider, IHostApplicationLifetime hostApplicationLifetime) : base(hostApplicationLifetime)
         {
             _commandService = commandService;
             _serviceProvider = serviceProvider;

@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Discord.Commands;
+using Microsoft.Extensions.Hosting;
 using YouTubePlays.Discord.Bot.Discord.Command;
 using YouTubePlays.Discord.Bot.Keyboard;
 
 namespace YouTubePlays.Discord.Bot.Discord.Modules
 {
     [Name("Keyboard")]
-    public class KeyboardModule : AbstractModule
+    public class KeyboardModule : AbstractSqliteContextModule
     {
         private readonly KeyboardCollection _keyboardCollection;
 
-        public KeyboardModule(KeyboardCollection keyboardCollection, IServiceProvider serviceProvider, CancellationTokenSource cancellationTokenSource) : base(serviceProvider, cancellationTokenSource)
+        public KeyboardModule(KeyboardCollection keyboardCollection, IHostApplicationLifetime hostApplicationLifetime) : base(hostApplicationLifetime)
         {
             _keyboardCollection = keyboardCollection;
         }

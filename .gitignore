@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+/YouTubePlays.Discord.Bot/src/appsettings.Development.json
