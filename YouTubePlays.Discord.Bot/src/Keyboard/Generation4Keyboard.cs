@@ -21,7 +21,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
         protected override TouchOptions TouchOptions { get; } = new TouchOptions
         {
             TouchAvailable = true,
-            PreExecuteCommand = "t:16:37",
+            PreExecuteCommand = "t:16:37,p2",
             ModeSwitchDelay = 4,
             ModeSwitchButton = new[] { (16, 37), (28, 37), (41, 37) }
         };

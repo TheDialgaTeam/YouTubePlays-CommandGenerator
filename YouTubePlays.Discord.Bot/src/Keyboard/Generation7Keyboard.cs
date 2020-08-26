@@ -20,7 +20,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
         protected override TouchOptions TouchOptions { get; } = new TouchOptions
         {
             TouchAvailable = true,
-            PreExecuteCommand = "l,t:15:89",
+            PreExecuteCommand = "l,t:15:89,p2",
             ModeSwitchButton = new[] { (15, 89), (28, 89), (40, 89) }
         };
 
