@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>YouTubePlays.Discord.Bot</AssemblyName>
     <RootNamespace>YouTubePlays.Discord.Bot</RootNamespace>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <PackageId>YouTubePlays.Discord.Bot</PackageId>
     <Version>0.2.1.0</Version>

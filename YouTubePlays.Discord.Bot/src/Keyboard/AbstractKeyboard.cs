@@ -137,8 +137,8 @@ namespace YouTubePlays.Discord.Bot.Keyboard
                     }
 
                     // Location adjustment because the keymap size is different.
-                    if (x > keyMapSizeX - 1) x = keyMapSizeX - 1;
-                    if (y > keyMapSizeY - 1) y = keyMapSizeY - 1;
+                    if (x > keyMapSizeX) x = keyMapSizeX;
+                    if (y > keyMapSizeY) y = keyMapSizeY;
                 }
 
                 if (keyMapping.X > x)

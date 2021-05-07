@@ -21,6 +21,7 @@ namespace YouTubePlays.Discord.Bot.Keyboard
         {
             TouchAvailable = true,
             PreExecuteCommand = "l,t:15:89,p2",
+            ModeSwitchDelay = 2,
             ModeSwitchButton = new[] { (15, 89), (28, 89), (40, 89) }
         };
 
